@@ -849,6 +849,7 @@ def get_row_as_form(table_name: str, data: dict) -> str:
     :param data: row data from table
     :return: string HTML for editable form for this row
     """
+    print("INNNNN get_row_as_form")
     html = ["form", {"method": "post"}]
     row_valid = None
 
