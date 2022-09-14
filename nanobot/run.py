@@ -577,7 +577,9 @@ def get_hiccup_form_row(
     # TODO: handle datatypes for ontology forms (include_datatypes?)
     global FORM_ROW_ID
 
-    if html_type in ["select", "radio", "checkbox"] and not allowed_values:
+    # TODO hk write regex for autocomplete
+    if html_type in ["select", "radio", "checkbox"] and not (html_type in allowed_values or
+                                                             html_type.startswith("autocomplete(")):
         # TODO: error handling - allowed_values should always be included for these
         raise Exception(f"A list of allowed values is required for HTML type '{html_type}'")
 
@@ -714,6 +716,19 @@ def get_hiccup_form_row(
             # Only add validation message to the last form-check element
             e.append(["div", {"class": validation_cls}, message])
         value_col.append(e)
+
+    elif html_type.startswith("autocomplete"):
+        # TODO hk regex for autocomplete
+        classes.insert(0, "form-control")
+        classes.append("my-class")
+        input_attrs["type"] = "text"
+        if html_type == "search":
+            classes.extend(["search", "typeahead"])
+            input_attrs["id"] = f"{header}-typeahead-form"
+        input_attrs["class"] = " ".join(classes)
+        if value:
+            input_attrs["value"] = html_escape(str(value))
+        value_col.append(["input", input_attrs])
 
     else:
         raise abort(500, f"'{html_type}' form field is not supported for column {header}.")
