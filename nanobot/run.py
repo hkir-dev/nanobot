@@ -723,7 +723,7 @@ def get_hiccup_form_row(
         # classes.append("my-class")
         input_attrs = {
             "type": "text",
-            "class": "form-control my-class",
+            "class": "form-control ebi-autocomplete",
             "data-selectpath": "http://ec2-3-143-113-50.us-east-2.compute.amazonaws.com:8080/",
             "data-olsontology": "bds2",
             "data-olswidget": "select",
