@@ -47,7 +47,7 @@ require = function t(e, o, i) {
                     minLength: 2,
                     limit: 4,
                     async: !0
-                }, i).focus()
+                }, i)
             }
 
             function i(e) {
