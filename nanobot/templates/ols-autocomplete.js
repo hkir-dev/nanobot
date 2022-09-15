@@ -61,7 +61,7 @@ require = function t(e, o, i) {
                             n = t(e.data.type);
                         return "ontology" != n && (a += "&nbsp;<div class='term-source'>" + e.data.shortForm + "</div>"), "<div style='width: 100%; display: table;'> <div style='display: table-row'><div  style='display: table-cell;' class='ontology-suggest'><div class='suggestion-value'>" + o + "</div>" + i + "</div><div style='vertical-align:middle; text-align: right; width:60px; display: table-cell;'>" + a + "</div></div></div>"
                     },
-                    footer: Handlebars.compile('<hr/><div onclick="jQuery(this).closest(\'form\').submit()" style="text-align: right;" class="tt-suggestion tt-selectable">Search OLS for <b>{{query}}</b></div>')
+                    footer: Handlebars.compile('<hr/><div onclick="jQuery(this).closest(\'form\').submit()" style="text-align: right;" class="tt-suggestion tt-selectable">Search EBI APIs for <b>{{query}}</b></div>')
                 }
             }
 
@@ -134,7 +134,7 @@ require = function t(e, o, i) {
                     var t = jQuery(this).data("selectpath") ? jQuery(this).data("selectpath") : "",
                         e = jQuery(this).data("olsontology") ? jQuery(this).data("olsontology") : "",
                         r = jQuery(this).data("olstype") ? jQuery(this).data("olstype") : "",
-                        s = jQuery(this).data("suggest-header") ? jQuery(this).data("suggest-header") : "Jump to",
+                        s = jQuery(this).data("suggest-header") ? jQuery(this).data("suggest-header") : "",
                         l = [{
                             name: "suggestion",
                             source: n(t, e),
@@ -150,7 +150,7 @@ require = function t(e, o, i) {
                     var t = jQuery(this).data("selectpath") ? jQuery(this).data("selectpath") : "",
                         e = jQuery(this).data("olsontology") ? jQuery(this).data("olsontology") : "",
                         n = jQuery(this).data("olstype") ? jQuery(this).data("olstype") : "",
-                        r = jQuery(this).data("suggest-header") ? jQuery(this).data("suggest-header") : "Jump to",
+                        r = jQuery(this).data("suggest-header") ? jQuery(this).data("suggest-header") : "",
                         s = [{
                             name: "selection",
                             source: a(t, e, n),
