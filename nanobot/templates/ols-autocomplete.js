@@ -113,7 +113,7 @@ require = function t(e, o, i) {
                     var s = o.obo_id;
                     return void 0 == s && (s = o.short_form), {
                         id: i,
-                        value: o.label,
+                        value: o.short_form,
                         data: {
                             ontology: o.ontology_name,
                             prefix: o.ontology_prefix,
