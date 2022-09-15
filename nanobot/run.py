@@ -719,15 +719,24 @@ def get_hiccup_form_row(
 
     elif html_type.startswith("autocomplete"):
         # TODO hk regex for autocomplete
-        classes.insert(0, "form-control")
-        classes.append("my-class")
-        input_attrs["type"] = "text"
-        if html_type == "search":
-            classes.extend(["search", "typeahead"])
-            input_attrs["id"] = f"{header}-typeahead-form"
-        input_attrs["class"] = " ".join(classes)
-        if value:
-            input_attrs["value"] = html_escape(str(value))
+        # classes.insert(0, "form-control")
+        # classes.append("my-class")
+        input_attrs = {
+            "type": "text",
+            "class": "form-control my-class",
+            "data-selectpath": "http://ec2-3-143-113-50.us-east-2.compute.amazonaws.com:8080/",
+            "data - olsontology": "bds2",
+            "data - olswidget": "select",
+            "olstype": "",
+            "name": "q",
+            "placeholder": "Search for ontology entity",
+        }
+        # if html_type == "search":
+        #     classes.extend(["search", "typeahead"])
+        #     input_attrs["id"] = f"{header}-typeahead-form"
+        # input_attrs["class"] = " ".join(classes)
+        # if value:
+        #     input_attrs["value"] = html_escape(str(value))
         value_col.append(["input", input_attrs])
 
     else:
