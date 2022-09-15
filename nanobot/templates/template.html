@@ -10,7 +10,8 @@
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/corejs-typeahead/0.11.1/typeahead.bundle.min.js"></script>
-	<script src="ols-autocomplete.js"></script>
+<!--	<script src="ols-autocomplete.js"></script>-->
+<!--	{% include "ols-autocomplete.js" %}-->
 	<!-- TODO hk	-->
 	<title>{{ project_name }}</title>
 	<style>
@@ -297,6 +298,11 @@
 	</div>
 </body>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
+{% block javascript %}
+    <script type="text/javascript">
+        {% include "ols-autocomplete.js" %}
+    </script>
+{% endblock %}
 <script>
 	function show_children() {
 		/**
