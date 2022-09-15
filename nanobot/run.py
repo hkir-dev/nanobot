@@ -735,8 +735,8 @@ def get_hiccup_form_row(
         #     classes.extend(["search", "typeahead"])
         #     input_attrs["id"] = f"{header}-typeahead-form"
         # input_attrs["class"] = " ".join(classes)
-        # if value:
-        #     input_attrs["value"] = html_escape(str(value))
+        if value:
+            input_attrs["value"] = html_escape(str(value))
         value_col.append(["input", input_attrs])
 
     else:
