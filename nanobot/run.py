@@ -1233,9 +1233,11 @@ def validate_table_row(table_name: str, data: dict, row_number: int = None) -> d
                 "valid": True,
                 "messages": [],
             }
+        print("111: " + str(result_row))
         # Row number may be different than row ID, if this column is used
         return validate_row(CONFIG, table_name, result_row, row_number=row_number)
     else:
+        print("222: " + str(data))
         return validate_row(CONFIG, table_name, data, existing_row=False)
 
 
@@ -1837,6 +1839,9 @@ def run(
     CONFIG = read_config_files(table_config, Lark(grammar, parser="lalr", transformer=TreeToDict()))
     CONFIG["db"] = setup_conn
     configure_db(CONFIG)
+
+    print("CONFIG!!!!!")
+    print(CONFIG)
 
     # SQLAlchemy connection required for sprocket/gizmos
     abspath = os.path.abspath(db)
