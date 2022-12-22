@@ -582,7 +582,6 @@ def get_hiccup_form_row(
     # TODO: handle datatypes for ontology forms (include_datatypes?)
     global FORM_ROW_ID
 
-    # TODO hk write regex for autocomplete
     if html_type in ["select", "radio", "checkbox"] and not (html_type in allowed_values or
                                                              html_type.startswith("autocomplete(")):
         # TODO: error handling - allowed_values should always be included for these
@@ -621,6 +620,7 @@ def get_hiccup_form_row(
 
     # Create the value input for this form row
     classes = []
+    print(str(header) + "   " + str(valid))
     if valid:
         classes.append("is-valid")
     elif valid is not None:
@@ -724,16 +724,17 @@ def get_hiccup_form_row(
 
     elif html_type.startswith("autocomplete"):
         # TODO hk regex for autocomplete
-        # classes.insert(0, "form-control")
-        # classes.append("my-class")
+        classes.insert(0, "form-control")
+        classes.append("ebi-autocomplete")
         input_attrs = {
             "type": "text",
-            "class": "form-control ebi-autocomplete",
-            "data-selectpath": "http://ec2-3-143-113-50.us-east-2.compute.amazonaws.com:8080/",
-            "data-olsontology": "bds2",
+            "class": " ".join(classes),
+            # "data-selectpath": "http://ec2-3-143-113-50.us-east-2.compute.amazonaws.com:8080/",
+            # "data-olsontology": "bds2",
+            "data-selectpath": "https://www.ebi.ac.uk/ols/",
+            "data-olsontology": "pcl",
             "data-olswidget": "select",
             "olstype": "",
-            # "name": "q",
             "name": header,
             "placeholder": "Search for ontology entity",
         }
