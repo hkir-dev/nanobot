@@ -134,6 +134,7 @@ def row(table_name, row_number):
         row_number = int(row_number)
     except ValueError:
         return abort(400, f"Row number '{row_number}' must be an integer")
+    print("IN row(table_name, row_number)")
     return render_row_from_database(table_name, None, row_number)
 
 
@@ -274,6 +275,7 @@ def table(table_name):
 
         validated_row = validate_table_row(table_name, new_row)
         if request.form["action"] == "validate":
+            print("table(table_name) validate")
             form_html = get_row_as_form(table_name, validated_row)
         elif request.form["action"] == "submit":
             # Add row to the database and get the new row number
@@ -357,6 +359,7 @@ def table(table_name):
 
 @BLUEPRINT.route("/<table_name>/<term_id>", methods=["GET", "POST"])
 def term(table_name, term_id):
+    print("IN term(table_name, term_id)")
     if not is_ontology(table_name):
         # Get row number based on PK
         row_number = get_row_number(table_name, term_id)
@@ -364,6 +367,8 @@ def term(table_name, term_id):
             return abort(
                 500, f"'{term_id}' is not a valid primary key value for table '{table_name}'"
             )
+        print("IN term(table_name, term_id) not is_ontology")
+        print(str(request.form))
         return render_row_from_database(table_name, term_id, row_number)
 
     # Redirect to main ontology table search, do not limit search results
@@ -1122,6 +1127,7 @@ def render_row_from_database(table_name: str, term_id: str, row_number: int) -> 
         # Manually override view, which is not included in request.args in CGI app
         view = "form"
         if request.form["action"] == "validate":
+            print("render_row_from_database validate")
             validated_row = validate_table_row(table_name, new_row, row_number=row_number)
             # Place row_number first
             validated_row_2 = {"row_number": row_number}
