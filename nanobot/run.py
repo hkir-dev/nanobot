@@ -1113,6 +1113,7 @@ def render_row_from_database(table_name: str, term_id: str, row_number: int) -> 
             if c.endswith("_meta") or c == "row_number":
                 continue
             v = request.form.get(c)
+            print(str(c) + "-    -" + str(v) + "-")
             if not v:
                 # Check for "other"
                 v = request.form.get(c + "_other", "")
