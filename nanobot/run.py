@@ -134,7 +134,6 @@ def row(table_name, row_number):
         row_number = int(row_number)
     except ValueError:
         return abort(400, f"Row number '{row_number}' must be an integer")
-    print("IN row(table_name, row_number)")
     return render_row_from_database(table_name, None, row_number)
 
 
@@ -275,7 +274,6 @@ def table(table_name):
 
         validated_row = validate_table_row(table_name, new_row)
         if request.form["action"] == "validate":
-            print("table(table_name) validate")
             form_html = get_row_as_form(table_name, validated_row)
         elif request.form["action"] == "submit":
             # Add row to the database and get the new row number
@@ -359,7 +357,6 @@ def table(table_name):
 
 @BLUEPRINT.route("/<table_name>/<term_id>", methods=["GET", "POST"])
 def term(table_name, term_id):
-    print("IN term(table_name, term_id)")
     if not is_ontology(table_name):
         # Get row number based on PK
         row_number = get_row_number(table_name, term_id)
@@ -367,8 +364,6 @@ def term(table_name, term_id):
             return abort(
                 500, f"'{term_id}' is not a valid primary key value for table '{table_name}'"
             )
-        print("IN term(table_name, term_id) not is_ontology")
-        print(str(request.form))
         return render_row_from_database(table_name, term_id, row_number)
 
     # Redirect to main ontology table search, do not limit search results
@@ -620,7 +615,6 @@ def get_hiccup_form_row(
 
     # Create the value input for this form row
     classes = []
-    print(str(header) + "   " + str(valid))
     if valid:
         classes.append("is-valid")
     elif valid is not None:
@@ -880,7 +874,6 @@ def get_row_as_form(table_name: str, data: dict) -> str:
     :param data: row data from table
     :return: string HTML for editable form for this row
     """
-    print("INNNNN get_row_as_form")
     html = ["form", {"method": "post"}]
     row_valid = None
 
@@ -1120,7 +1113,6 @@ def render_row_from_database(table_name: str, term_id: str, row_number: int) -> 
             if c.endswith("_meta") or c == "row_number":
                 continue
             v = request.form.get(c)
-            print(str(c) + "-    -" + str(v) + "-")
             if not v:
                 # Check for "other"
                 v = request.form.get(c + "_other", "")
@@ -1129,7 +1121,6 @@ def render_row_from_database(table_name: str, term_id: str, row_number: int) -> 
         # Manually override view, which is not included in request.args in CGI app
         view = "form"
         if request.form["action"] == "validate":
-            print("render_row_from_database validate")
             validated_row = validate_table_row(table_name, new_row, row_number=row_number)
             # Place row_number first
             validated_row_2 = {"row_number": row_number}
@@ -1242,11 +1233,9 @@ def validate_table_row(table_name: str, data: dict, row_number: int = None) -> d
                 "valid": True,
                 "messages": [],
             }
-        print("111: " + str(result_row))
         # Row number may be different than row ID, if this column is used
         return validate_row(CONFIG, table_name, result_row, row_number=row_number)
     else:
-        print("222: " + str(data))
         return validate_row(CONFIG, table_name, data, existing_row=False)
 
 
@@ -1848,9 +1837,6 @@ def run(
     CONFIG = read_config_files(table_config, Lark(grammar, parser="lalr", transformer=TreeToDict()))
     CONFIG["db"] = setup_conn
     configure_db(CONFIG)
-
-    print("CONFIG!!!!!")
-    print(CONFIG)
 
     # SQLAlchemy connection required for sprocket/gizmos
     abspath = os.path.abspath(db)
