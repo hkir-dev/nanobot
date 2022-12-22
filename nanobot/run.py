@@ -733,7 +733,8 @@ def get_hiccup_form_row(
             "data-olsontology": "bds2",
             "data-olswidget": "select",
             "olstype": "",
-            "name": "q",
+            # "name": "q",
+            "name": header,
             "placeholder": "Search for ontology entity",
         }
         # if html_type == "search":
