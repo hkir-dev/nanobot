@@ -1,0 +1,79 @@
+{% extends "template.html" %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="row">
+        <form method="get">
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group required row mb-2">
+                        <label for="sourceAccessionId" class="col-2 col-form-label">Accession Id</label>
+                        <div class="col-6">
+                            <input id="sourceAccessionId" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group required row mb-2">
+                        <label for="targetAccessionId" class="col-2 col-form-label">Accession Id</label>
+                        <div class="col-6">
+                            <input id="targetAccessionId" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group required row mb-2">
+                        <label for="sourceName" class="col-2 col-form-label">Name</label>
+                        <div class="col-6">
+                            <input id="sourceName" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group required row mb-2">
+                        <label for="targetName" class="col-2 col-form-label">Name</label>
+                        <div class="col-6">
+                            <input id="targetName" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-9">
+                    <div class="form-group required row mb-2">
+                        <label for="evidence" class="col-2 col-form-label">Evidence Comment</label>
+                        <div class="col-9">
+                            <input id="evidence" class="form-control" type="text" value=""/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-9">
+                    <div class="form-group required row mb-2">
+                        <label for="provenance" class="col-2 col-form-label">Provenance</label>
+                        <div class="col-9">
+                            <input id="provenance" class="form-control" type="text" value=""/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-9">
+                    <div class="form-group row mb-2">
+                        <label for="similarity" class="col-2 col-form-label">Similarity Score</label>
+                        <div class="col-2">
+                            <input id="similarity" class="form-control" type="text" value=""/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <button type="button" class="btn btn-primary px-4 float-right">Map</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

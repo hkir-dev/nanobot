@@ -450,6 +450,17 @@ def term(table_name, term_id):
         )
 
 
+@BLUEPRINT.route("/mappings", methods=["GET"])
+def mappings():
+    return render_template(
+        "mappings.html",
+        title="Mappings",
+        project_name=OPTIONS["title"],
+        tables=get_display_tables(),
+        ontologies=get_display_ontologies(),
+    )
+
+
 def flatten(lst: list) -> list:
     """Flatten a nested list.
 
