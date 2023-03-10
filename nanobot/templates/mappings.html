@@ -8,7 +8,7 @@
                 <div class="col-6">
                     <div class="form-group required row mb-2">
                         <label for="sourceAccessionId" class="col-2 col-form-label">Accession Id</label>
-                        <div class="col-6">
+                        <div id="sourceAccessionIdDiv" class="col-6">
                             <input id="sourceAccessionId" class="typeahead form-control" type="text" value="" placeholder="Search"/>
                         </div>
                     </div>
@@ -76,4 +76,42 @@
         </form>
     </div>
 </div>
+
+
+<script>
+// constructs the suggestion engine
+var sourceAccessionBH = new Bloodhound({
+  // datumTokenizer: Bloodhound.tokenizers.whitespace,
+  datumTokenizer: Bloodhound.tokenizers.obj.nonword('name', 'synonyms'),
+  queryTokenizer: Bloodhound.tokenizers.whitespace,
+  sorter: function(a, b) {
+    return a.order - b.order;
+  },
+  remote: {
+    url: '/taxonomy?name=%QUERY',
+    wildcard: '%QUERY',
+    transform : function(response) {
+      return sourceAccessionBH.sorter(response);
+    }
+  }
+});
+
+$('#sourceAccessionIdDiv .typeahead').typeahead({
+  hint: false,
+  highlight: true,
+  minLength: 1
+},
+{
+  name: 'sourceAccession',
+  source: sourceAccessionBH,
+  limit: 15,
+  templates: {
+    suggestion: function(data) {
+        item_text = data.name + ' [' + data.accession_id + ']';
+        return '<p>' + item_text + '</p>';
+    }
+  }
+});
+</script>
+
 {% endblock %}

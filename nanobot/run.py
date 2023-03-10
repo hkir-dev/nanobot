@@ -46,6 +46,7 @@ from cmi_pb_script.cmi_pb_grammar import grammar, TreeToDict
 from cmi_pb_script.load import configure_db, insert_new_row, read_config_files, update_row
 from cmi_pb_script.validate import get_matching_values, validate_row
 
+from Levenshtein import distance as levenshtein_distance
 
 BUILTIN_LABELS = {
     "rdfs:subClassOf": "parent class",
@@ -459,6 +460,73 @@ def mappings():
         tables=get_display_tables(),
         ontologies=get_display_ontologies(),
     )
+
+
+@BLUEPRINT.route("/taxonomy", methods=["GET"])
+def taxonomy():
+    taxonomy_data = get_taxonomy_data(get_taxonomy_name())
+    search_text = request.args.get("name")
+    if search_text:
+        search_text = search_text.lower().strip()
+        filtered_data = list()
+        for data in taxonomy_data:
+            if search_text in data["name"].lower() or any(search_text in s.lower() for s in data["synonyms"]):
+                data["order"] = levenshtein_distance(data["name"], search_text)
+                filtered_data.append(data)
+        taxonomy_data = filtered_data
+    search_id = request.args.get("accession_id")
+    if search_id:
+        search_id = search_text.lower().strip()
+        filtered_data = list()
+        for data in taxonomy_data:
+            if search_id in data["accession_id"].lower():
+                data["order"] = levenshtein_distance(data["accession_id"], search_id)
+                filtered_data.append(data)
+        taxonomy_data = filtered_data
+    return json.dumps(taxonomy_data)
+
+
+def get_taxonomy_data(taxonomy_name):
+    """Get content of the taxonomy from a database.
+
+    :param taxonomy_name: name of the taxonomy
+    :return dict of: cell_set_accession -> accession details
+    """
+    res = CONN.execute(
+        "SELECT cell_set_accession, cell_type_name, synonyms, parent_cell_set_accession FROM " + taxonomy_name + " ;"
+    )
+    results = list()
+    for db_row in res:
+        synonyms = []
+        parent = ""
+        name = ""
+        if db_row["cell_type_name"]:
+            name = db_row["cell_type_name"]
+        if db_row["synonyms"]:
+            synonyms = str(db_row["synonyms"]).split("|")
+        if db_row["parent_cell_set_accession"]:
+            parent = db_row["parent_cell_set_accession"]
+        results.append({
+            "accession_id": db_row["cell_set_accession"],
+            "name": name,
+            "synonyms": synonyms,
+            "parent": parent
+        })
+    return results
+
+
+def get_taxonomy_name():
+    """
+    Returns the name of the taxonomy being processed.
+    Returns: name of the active taxonomy
+
+    """
+    cross_taxonomy_postfix = "_cross_taxonomy"
+    taxonomy_name = ""
+    for tbl in get_display_tables():
+        if cross_taxonomy_postfix in str(tbl):
+            taxonomy_name = str(tbl).replace(cross_taxonomy_postfix, "")
+    return taxonomy_name
 
 
 def flatten(lst: list) -> list:
