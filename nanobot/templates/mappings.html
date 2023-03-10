@@ -26,7 +26,7 @@
                 <div class="col-6">
                     <div class="form-group required row mb-2">
                         <label for="sourceName" class="col-2 col-form-label">Name</label>
-                        <div class="col-6">
+                        <div id="sourceNameDiv" class="col-6">
                             <input id="sourceName" class="typeahead form-control" type="text" value="" placeholder="Search"/>
                         </div>
                     </div>
@@ -79,45 +79,57 @@
 
 
 <script>
+function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
+    // constructs the suggestion engine
+    var typeaheadBH = new Bloodhound({
+      datumTokenizer: Bloodhound.tokenizers.whitespace,
+      // datumTokenizer: Bloodhound.tokenizers.obj.nonword('name', 'synonyms'),
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      sorter: function(a, b) {
+        return a.order - b.order;
+      },
+      remote: {
+        url: search_endpoint,
+        wildcard: '%QUERY',
+        transform : function(response) {
+          return typeaheadBH.sorter(response);
+        }
+      }
+    });
 
-// constructs the suggestion engine
-var sourceAccessionBH = new Bloodhound({
-  // datumTokenizer: Bloodhound.tokenizers.whitespace,
-  datumTokenizer: Bloodhound.tokenizers.obj.nonword('name', 'synonyms'),
-  queryTokenizer: Bloodhound.tokenizers.whitespace,
-  sorter: function(a, b) {
-    return a.order - b.order;
-  },
-  remote: {
-    url: '/taxonomy?name=%QUERY',
-    wildcard: '%QUERY',
-    transform : function(response) {
-      return sourceAccessionBH.sorter(response);
-    }
-  }
-});
+    $('#' + divId + ' .typeahead').typeahead({
+      hint: false,
+      highlight: true,
+      minLength: 1
+    },
+    {
+      name: 'autocomplete',
+      source: typeaheadBH,
+      limit: 30,
+      display: function(item) {
+        if (divId.includes('AccessionId')) {
+            return item.accession_id;
+        } else {
+            return item.name
+        }
+      },
+      templates: {
+        suggestion: function(data) {
+            return '<p>' + data.name + ' [' + data.accession_id + ']' + '</p>';
+        }
+      }
+    });
+}// end configure_autocomplete
 
-$('#sourceAccessionIdDiv .typeahead').typeahead({
-  hint: false,
-  highlight: true,
-  minLength: 1
-},
-{
-  name: 'sourceAccession',
-  source: sourceAccessionBH,
-  limit: 30,
-  display: function(item) {
-    return item.accession_id;
-  },
-  templates: {
-    suggestion: function(data) {
-        return '<p>' + data.name + ' [' + data.accession_id + ']' + '</p>';
-    }
-  }
-});
+configure_autocomplete("sourceAccessionIdDiv", "sourceName", "/taxonomy?accession_id=%QUERY")
+configure_autocomplete("sourceNameDiv", "sourceAccessionId", "/taxonomy?name=%QUERY")
 
+// automatically fill related fields
 $('#sourceAccessionId').bind('typeahead:select', function(ev, suggestion) {
   $('#sourceName')[0].value = suggestion.name;
+});
+$('#sourceName').bind('typeahead:select', function(ev, suggestion) {
+  $('#sourceAccessionId')[0].value = suggestion.accession_id;
 });
 
 </script>

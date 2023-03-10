@@ -476,7 +476,7 @@ def taxonomy():
         taxonomy_data = filtered_data
     search_id = request.args.get("accession_id")
     if search_id:
-        search_id = search_text.lower().strip()
+        search_id = search_id.lower().strip()
         filtered_data = list()
         for data in taxonomy_data:
             if search_id in data["accession_id"].lower():
