@@ -97,10 +97,10 @@ OPTIONS = {
 
 mapping_helper = TaxonomyMapper()
 
-taxonomies_to_map = dict()
+mapping_target_data = None  # type: Optional[dict]
 
 # TODO: read these from the config file (name, version, purl, type? (dendrogram, nomenclature, repo))
-target_hierarchies = {
+mapping_target_config = {
     "CCN201912132": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/marmosetM1_CCN201912132/nomenclature_table_CCN201912132.csv",
     "CCN202002013": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/mouseMOp_CCN202002013/nomenclature_table_CCN202002013.csv"
 }
@@ -480,7 +480,25 @@ def mappings():
 def mapping_source():
     source_tabel_name = mapping_helper.get_source_table_name(get_display_tables())
     source_data = mapping_helper.get_source_data(source_tabel_name)
+
     search_text = request.args.get("name")
+    search_id = request.args.get("entity_id")
+    source_data = filter_data(source_data, search_text, search_id)
+    return json.dumps(source_data)
+
+
+@BLUEPRINT.route("/mapping_target", methods=["GET"])
+def mapping_target():
+    target_name = request.args.get("target_name")
+    target_data = mapping_target_data[target_name]
+
+    search_text = request.args.get("name")
+    search_id = request.args.get("entity_id")
+    target_data = filter_data(target_data, search_text, search_id)
+    return json.dumps(target_data)
+
+
+def filter_data(source_data, search_text, search_id):
     if search_text:
         search_text = search_text.lower().strip()
         filtered_data = list()
@@ -489,7 +507,6 @@ def mapping_source():
                 data["order"] = levenshtein_distance(data["name"], search_text)
                 filtered_data.append(data)
         source_data = filtered_data
-    search_id = request.args.get("entity_id")
     if search_id:
         search_id = search_id.lower().strip()
         filtered_data = list()
@@ -498,12 +515,12 @@ def mapping_source():
                 data["order"] = levenshtein_distance(data["entity_id"], search_id)
                 filtered_data.append(data)
         source_data = filtered_data
-    return json.dumps(source_data)
+    return source_data
 
 
 @BLUEPRINT.route("/list_target_hierarchies", methods=["GET"])
 def list_target_hierarchies():
-    target_hierarchy_names = list(target_hierarchies.keys())
+    target_hierarchy_names = list(mapping_target_config.keys())
     target_hierarchy_names.sort()
     return target_hierarchy_names
 
@@ -1867,7 +1884,7 @@ def run(
                             predicates can be displayed in alphabetical order after the sorted
                             predicates using '*'
     """
-    global CONFIG, CONN, LOGGER, OPTIONS
+    global CONFIG, CONN, LOGGER, OPTIONS, mapping_target_data
 
     # Override default options
     for k in OPTIONS.keys():
@@ -1902,7 +1919,9 @@ def run(
     engine = create_engine(db_url)
     CONN = engine.connect()
 
+    # mapping data preparation
     mapping_helper.set_db_connection(CONN)
+    mapping_target_data = mapping_helper.load_target_data(mapping_target_config)
 
     if cgi_path:
         os.environ["SCRIPT_NAME"] = cgi_path

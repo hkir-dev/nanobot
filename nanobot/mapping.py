@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class AbstractMapper(ABC):
     """
     Abstract base class for mapping capabilities
@@ -21,7 +22,7 @@ class AbstractMapper(ABC):
         pass
 
     @abstractmethod
-    def get_source_data(self, source_table_name) :
+    def get_source_data(self, source_table_name):
         """
         Retourns the mappings source table data
         Args:
@@ -29,5 +30,15 @@ class AbstractMapper(ABC):
 
         Returns:
 
+        """
+        pass
+
+    @abstractmethod
+    def load_target_data(self, mapping_target_config):
+        """
+        Loads mapping target's data using the given configurations.
+        Args:
+            mapping_target_config: mapping target configurations
+        Returns: Mapping data target
         """
         pass

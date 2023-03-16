@@ -13,7 +13,7 @@
             <div class="row">
                 <label for="similarity" class="col-3 col-form-label">Target Taxonomy: </label>
                 <div class="col-4">
-                    <select class="form-select" title="">
+                    <select id="targetTaxonomyName" class="form-select" title="">
                       <option selected></option>
                       {% for target_taxon in target_taxonomies %}
                       <option value="{{target_taxon}}">{{target_taxon}}</option>
@@ -37,7 +37,7 @@
                 <div class="col-6">
                     <div class="form-group required row mb-2">
                         <label for="targetAccessionId" class="col-2 col-form-label">Accession Id</label>
-                        <div class="col-6">
+                        <div id="targetAccessionIdDiv"  class="col-6">
                             <input id="targetAccessionId" class="typeahead form-control" type="text" value="" placeholder="Search"/>
                         </div>
                     </div>
@@ -55,7 +55,7 @@
                 <div class="col-6">
                     <div class="form-group required row mb-2">
                         <label for="targetName" class="col-2 col-form-label">Name</label>
-                        <div class="col-6">
+                        <div id="targetNameDiv" class="col-6">
                             <input id="targetName" class="typeahead form-control" type="text" value="" placeholder="Search"/>
                         </div>
                     </div>
@@ -114,7 +114,17 @@ function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
         wildcard: '%QUERY',
         transform : function(response) {
           return typeaheadBH.sorter(response);
-        }
+        },
+        replace: function(url, uriEncodedQuery) {
+            target_name = $('#targetTaxonomyName').find(":selected").text();
+            if (divId.includes('target') && target_name){
+                target_name = $('#targetTaxonomyName').find(":selected").text();
+                return url.replace("%QUERY", uriEncodedQuery) + '&target_name=' + target_name;
+            }
+            else{
+                return url.replace("%QUERY", uriEncodedQuery);
+            }
+        },
       }
     });
 
@@ -145,12 +155,21 @@ function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
 configure_autocomplete("sourceAccessionIdDiv", "sourceName", "/mapping_source?entity_id=%QUERY")
 configure_autocomplete("sourceNameDiv", "sourceAccessionId", "/mapping_source?name=%QUERY")
 
-// automatically fill related fields
+configure_autocomplete("targetAccessionIdDiv", "targetName", "/mapping_target?entity_id=%QUERY")
+configure_autocomplete("targetNameDiv", "targetAccessionId", "/mapping_target?name=%QUERY")
+
+// automatically fill related fields (id <-> name)
 $('#sourceAccessionId').bind('typeahead:select', function(ev, suggestion) {
   $('#sourceName')[0].value = suggestion.name;
 });
 $('#sourceName').bind('typeahead:select', function(ev, suggestion) {
   $('#sourceAccessionId')[0].value = suggestion.entity_id;
+});
+$('#targetAccessionId').bind('typeahead:select', function(ev, suggestion) {
+  $('#targetName')[0].value = suggestion.name;
+});
+$('#targetName').bind('typeahead:select', function(ev, suggestion) {
+  $('#targetAccessionId')[0].value = suggestion.entity_id;
 });
 
 $(document).ready(function(e){
