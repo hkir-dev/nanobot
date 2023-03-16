@@ -4,6 +4,7 @@ import logging
 import os
 import sqlite3
 import traceback
+import requests
 
 from collections import defaultdict
 
@@ -91,6 +92,14 @@ OPTIONS = {
     "synonym": "IAO:0000118",
     "title": "Terminology",
     "tree_predicates": None,
+}
+
+taxonomies_to_map = dict()
+
+# TODO: read these from the config file (name, version, purl, type? (dendrogram, nomenclature, repo))
+target_taxonomies = {
+    "CCN201912132": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/marmosetM1_CCN201912132/nomenclature_table_CCN201912132.csv",
+    "CCN202002013": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/mouseMOp_CCN202002013/nomenclature_table_CCN202002013.csv"
 }
 
 
@@ -459,6 +468,8 @@ def mappings():
         project_name=OPTIONS["title"],
         tables=get_display_tables(),
         ontologies=get_display_ontologies(),
+        current_taxonomy=get_taxonomy_name(),
+        target_taxonomies=list_target_taxonomies(),
     )
 
 

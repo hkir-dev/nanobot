@@ -2,6 +2,27 @@
 
 {% block content %}
 <div class="col-md-12">
+    <div class="row" style="margin-bottom: 100px">
+        <div class="col-6">
+            <div class="row">
+                <label for="similarity" class="col-3 col-form-label">Current Taxonomy:</label>
+                <label for="similarity" class="col-4 col-form-label">{{current_taxonomy}}</label>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="row">
+                <label for="similarity" class="col-3 col-form-label">Target Taxonomy: </label>
+                <div class="col-4">
+                    <select class="form-select" title="">
+                      <option selected></option>
+                      {% for target_taxon in target_taxonomies %}
+                      <option value="{{target_taxon}}">{{target_taxon}}</option>
+                      {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <form method="get">
             <div class="row">
@@ -132,6 +153,26 @@ $('#sourceName').bind('typeahead:select', function(ev, suggestion) {
   $('#sourceAccessionId')[0].value = suggestion.accession_id;
 });
 
+$(document).ready(function(e){
+    console.log("jquery ready");
+
+    // Load Target Taxonomy
+    $("#loadTaxonomyBtn").click(function(e) {
+        console.log("button clicked");
+        e.preventDefault();
+        $.ajax({
+            type: "POST",
+            url: "/load_taxonomy?url=" + $("#target_taxonomy").val(),
+            success: function(result) {
+                // TODO load treeview
+            },
+            error: function(result) {
+                alert('Taxonomy loading failed: ' + result);
+            }
+        });
+    });
+
+});
 </script>
 
 {% endblock %}
