@@ -48,6 +48,7 @@ from cmi_pb_script.load import configure_db, insert_new_row, read_config_files, 
 from cmi_pb_script.validate import get_matching_values, validate_row
 
 from Levenshtein import distance as levenshtein_distance
+from taxonomy_mapping import TaxonomyMapper
 
 BUILTIN_LABELS = {
     "rdfs:subClassOf": "parent class",
@@ -94,10 +95,12 @@ OPTIONS = {
     "tree_predicates": None,
 }
 
+mapping_helper = TaxonomyMapper()
+
 taxonomies_to_map = dict()
 
 # TODO: read these from the config file (name, version, purl, type? (dendrogram, nomenclature, repo))
-target_taxonomies = {
+target_hierarchies = {
     "CCN201912132": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/marmosetM1_CCN201912132/nomenclature_table_CCN201912132.csv",
     "CCN202002013": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/mouseMOp_CCN202002013/nomenclature_table_CCN202002013.csv"
 }
@@ -468,76 +471,41 @@ def mappings():
         project_name=OPTIONS["title"],
         tables=get_display_tables(),
         ontologies=get_display_ontologies(),
-        current_taxonomy=get_taxonomy_name(),
-        target_taxonomies=list_target_taxonomies(),
+        current_taxonomy=mapping_helper.get_source_table_name(get_display_tables()),
+        target_taxonomies=list_target_hierarchies(),
     )
 
 
-@BLUEPRINT.route("/taxonomy", methods=["GET"])
-def taxonomy():
-    taxonomy_data = get_taxonomy_data(get_taxonomy_name())
+@BLUEPRINT.route("/mapping_source", methods=["GET"])
+def mapping_source():
+    source_tabel_name = mapping_helper.get_source_table_name(get_display_tables())
+    source_data = mapping_helper.get_source_data(source_tabel_name)
     search_text = request.args.get("name")
     if search_text:
         search_text = search_text.lower().strip()
         filtered_data = list()
-        for data in taxonomy_data:
+        for data in source_data:
             if search_text in data["name"].lower() or any(search_text in s.lower() for s in data["synonyms"]):
                 data["order"] = levenshtein_distance(data["name"], search_text)
                 filtered_data.append(data)
-        taxonomy_data = filtered_data
-    search_id = request.args.get("accession_id")
+        source_data = filtered_data
+    search_id = request.args.get("entity_id")
     if search_id:
         search_id = search_id.lower().strip()
         filtered_data = list()
-        for data in taxonomy_data:
-            if search_id in data["accession_id"].lower():
-                data["order"] = levenshtein_distance(data["accession_id"], search_id)
+        for data in source_data:
+            if search_id in data["entity_id"].lower():
+                data["order"] = levenshtein_distance(data["entity_id"], search_id)
                 filtered_data.append(data)
-        taxonomy_data = filtered_data
-    return json.dumps(taxonomy_data)
+        source_data = filtered_data
+    return json.dumps(source_data)
 
 
-def get_taxonomy_data(taxonomy_name):
-    """Get content of the taxonomy from a database.
-
-    :param taxonomy_name: name of the taxonomy
-    :return dict of: cell_set_accession -> accession details
-    """
-    res = CONN.execute(
-        "SELECT cell_set_accession, cell_type_name, synonyms, parent_cell_set_accession FROM " + taxonomy_name + " ;"
-    )
-    results = list()
-    for db_row in res:
-        synonyms = []
-        parent = ""
-        name = ""
-        if db_row["cell_type_name"]:
-            name = db_row["cell_type_name"]
-        if db_row["synonyms"]:
-            synonyms = str(db_row["synonyms"]).split("|")
-        if db_row["parent_cell_set_accession"]:
-            parent = db_row["parent_cell_set_accession"]
-        results.append({
-            "accession_id": db_row["cell_set_accession"],
-            "name": name,
-            "synonyms": synonyms,
-            "parent": parent
-        })
-    return results
-
-
-def get_taxonomy_name():
-    """
-    Returns the name of the taxonomy being processed.
-    Returns: name of the active taxonomy
-
-    """
-    cross_taxonomy_postfix = "_cross_taxonomy"
-    taxonomy_name = ""
-    for tbl in get_display_tables():
-        if cross_taxonomy_postfix in str(tbl):
-            taxonomy_name = str(tbl).replace(cross_taxonomy_postfix, "")
-    return taxonomy_name
+@BLUEPRINT.route("/list_target_hierarchies", methods=["GET"])
+def list_target_hierarchies():
+    target_hierarchy_names = list(target_hierarchies.keys())
+    target_hierarchy_names.sort()
+    return target_hierarchy_names
 
 
 def flatten(lst: list) -> list:
@@ -1933,6 +1901,8 @@ def run(
     db_url = "sqlite:///" + abspath + "?check_same_thread=False"
     engine = create_engine(db_url)
     CONN = engine.connect()
+
+    mapping_helper.set_db_connection(CONN)
 
     if cgi_path:
         os.environ["SCRIPT_NAME"] = cgi_path

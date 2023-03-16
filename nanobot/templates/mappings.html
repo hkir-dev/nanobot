@@ -129,28 +129,28 @@ function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
       limit: 30,
       display: function(item) {
         if (divId.includes('AccessionId')) {
-            return item.accession_id;
+            return item.entity_id;
         } else {
             return item.name
         }
       },
       templates: {
         suggestion: function(data) {
-            return '<p>' + data.name + ' [' + data.accession_id + ']' + '</p>';
+            return '<p>' + data.name + ' [' + data.entity_id + ']' + '</p>';
         }
       }
     });
 }// end configure_autocomplete
 
-configure_autocomplete("sourceAccessionIdDiv", "sourceName", "/taxonomy?accession_id=%QUERY")
-configure_autocomplete("sourceNameDiv", "sourceAccessionId", "/taxonomy?name=%QUERY")
+configure_autocomplete("sourceAccessionIdDiv", "sourceName", "/mapping_source?entity_id=%QUERY")
+configure_autocomplete("sourceNameDiv", "sourceAccessionId", "/mapping_source?name=%QUERY")
 
 // automatically fill related fields
 $('#sourceAccessionId').bind('typeahead:select', function(ev, suggestion) {
   $('#sourceName')[0].value = suggestion.name;
 });
 $('#sourceName').bind('typeahead:select', function(ev, suggestion) {
-  $('#sourceAccessionId')[0].value = suggestion.accession_id;
+  $('#sourceAccessionId')[0].value = suggestion.entity_id;
 });
 
 $(document).ready(function(e){
