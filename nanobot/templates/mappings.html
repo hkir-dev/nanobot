@@ -2,7 +2,8 @@
 
 {% block content %}
 <div class="col-md-12">
-    <div class="row" style="margin-bottom: 100px">
+    <!--    TAXONOMY SELECTION    -->
+    <div class="row" style="margin-top: 10px">
         <div class="col-6">
             <div class="row">
                 <label for="similarity" class="col-3 col-form-label">Current Taxonomy:</label>
@@ -23,6 +24,16 @@
             </div>
         </div>
     </div>
+    <!--    TREE VIEW    -->
+    <div class="row" style="margin-bottom: 20px">
+        <div class="col-6">
+            <div id="source-treeeview" class="col-8" style=" overflow-y:auto; height: 300px; border: 1px solid #ccc ;"></div>
+        </div>
+        <div class="col-6">
+            <div id="target-treeeview"></div>
+        </div>
+    </div>
+    <!--    MAPPING FORM    -->
     <div class="row">
         <form method="get">
             <div class="row">
@@ -100,6 +111,8 @@
 
 
 <script>
+// Autocomplete operations
+
 function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
     // constructs the suggestion engine
     var typeaheadBH = new Bloodhound({
@@ -116,12 +129,14 @@ function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
           return typeaheadBH.sorter(response);
         },
         replace: function(url, uriEncodedQuery) {
-            target_name = $('#targetTaxonomyName').find(":selected").text();
-            if (divId.includes('target') && target_name){
+            // mapping_target endpoint requires an extra parameter to specify target name
+            if (divId.includes('target')){
                 target_name = $('#targetTaxonomyName').find(":selected").text();
-                return url.replace("%QUERY", uriEncodedQuery) + '&target_name=' + target_name;
-            }
-            else{
+                if (target_name) {
+                    target_name = $('#targetTaxonomyName').find(":selected").text();
+                    return url.replace("%QUERY", uriEncodedQuery) + '&target_name=' + target_name;
+                }
+            } else {
                 return url.replace("%QUERY", uriEncodedQuery);
             }
         },
@@ -152,11 +167,11 @@ function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
     });
 }// end configure_autocomplete
 
-configure_autocomplete("sourceAccessionIdDiv", "sourceName", "/mapping_source?entity_id=%QUERY")
-configure_autocomplete("sourceNameDiv", "sourceAccessionId", "/mapping_source?name=%QUERY")
+configure_autocomplete("sourceAccessionIdDiv", "sourceName", "/mapping_source?entity_id=%QUERY");
+configure_autocomplete("sourceNameDiv", "sourceAccessionId", "/mapping_source?name=%QUERY");
 
-configure_autocomplete("targetAccessionIdDiv", "targetName", "/mapping_target?entity_id=%QUERY")
-configure_autocomplete("targetNameDiv", "targetAccessionId", "/mapping_target?name=%QUERY")
+configure_autocomplete("targetAccessionIdDiv", "targetName", "/mapping_target?entity_id=%QUERY");
+configure_autocomplete("targetNameDiv", "targetAccessionId", "/mapping_target?name=%QUERY");
 
 // automatically fill related fields (id <-> name)
 $('#sourceAccessionId').bind('typeahead:select', function(ev, suggestion) {
@@ -171,6 +186,8 @@ $('#targetAccessionId').bind('typeahead:select', function(ev, suggestion) {
 $('#targetName').bind('typeahead:select', function(ev, suggestion) {
   $('#targetAccessionId')[0].value = suggestion.entity_id;
 });
+
+// TODO delete this
 
 $(document).ready(function(e){
     console.log("jquery ready");
@@ -192,6 +209,56 @@ $(document).ready(function(e){
     });
 
 });
+
+// Tree operations
+
+var defaultData = [
+  {
+    text: "Node 1",
+    expanded: true,
+    nodes: [
+      {
+        text: "Sub Node 1",
+        nodes: [
+          {
+            text:  "Sub Child Node 1",
+          },
+          {
+            text: "Sub Child Node 2"
+          }
+        ]
+      },
+      {
+        text: "Sub Node 2"
+      }
+    ]
+  },
+  {
+    text: "Node 2"
+  },
+  {
+    text: "Node 3"
+  },
+  {
+    text: "Node 4"
+  },
+  {
+    text: "Node 5"
+  }
+];
+
+$('#source-treeeview').bind('mousewheel', function(e) {
+  $(this).scrollTop($(this).scrollTop() - e.originalEvent.wheelDeltaY);
+  return false;
+});
+var $searchableTree = $('#source-treeeview').bstreeview({
+  data: defaultData,
+  color: "#428bca",
+  levels: 5,
+  showBorder: false
+});
+
+
 </script>
 
 {% endblock %}

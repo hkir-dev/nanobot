@@ -8,3 +8,18 @@
   max-height: 200px;
   overflow-y: auto;
 }
+
+#targetAccessionIdDiv .tt-menu {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#sourceNameDiv .tt-menu {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#targetNameDiv .tt-menu {
+  max-height: 200px;
+  overflow-y: auto;
+}
