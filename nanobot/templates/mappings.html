@@ -3,7 +3,7 @@
 {% block content %}
 <div class="col-md-12">
     <!--    TAXONOMY SELECTION    -->
-    <div class="row" style="margin-top: 10px">
+    <div class="row" style="margin-bottom: 10px">
         <div class="col-6">
             <div class="row">
                 <label for="similarity" class="col-3 col-form-label">Current Taxonomy:</label>
@@ -27,10 +27,10 @@
     <!--    TREE VIEW    -->
     <div class="row" style="margin-bottom: 20px">
         <div class="col-6">
-            <div id="source-treeeview" class="col-8" style=" overflow-y:auto; height: 300px; border: 1px solid #ccc ;"></div>
+            <div id="source-treeview" class="col-8" style=" overflow-y:auto; height: 300px; border: 1px solid #ccc ;"></div>
         </div>
         <div class="col-6">
-            <div id="target-treeeview"></div>
+            <div id="target-treeview" class="col-8" style=" overflow-y:auto; height: 300px; border: 1px solid #ccc ;"></div>
         </div>
     </div>
     <!--    MAPPING FORM    -->
@@ -111,6 +111,8 @@
 
 
 <script>
+target_data_tree=JSON.parse('{{target_data_tree | tojson}}');
+
 // Autocomplete operations
 
 function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
@@ -247,17 +249,31 @@ var defaultData = [
   }
 ];
 
-$('#source-treeeview').bind('mousewheel', function(e) {
+$('#source-treeview').bind('mousewheel', function(e) {
   $(this).scrollTop($(this).scrollTop() - e.originalEvent.wheelDeltaY);
   return false;
 });
-var $searchableTree = $('#source-treeeview').bstreeview({
+var $searchableTree = $('#source-treeview').bstreeview({
   data: defaultData,
   color: "#428bca",
   levels: 5,
   showBorder: false
 });
 
+// target tree view
+$('#targetTaxonomyName').on('change', function() {
+  // remove existing view
+  $('#target-treeview').empty();
+  $("#target-treeview").removeClass("bstreeview");
+  // apply selected treeview
+  tree_data=target_data_tree[this.value];
+  $('#target-treeview').bstreeview({
+      data: tree_data,
+      color: "#428bca",
+      levels: 5,
+      showBorder: false
+  });
+});
 
 </script>
 

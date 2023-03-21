@@ -5,6 +5,7 @@ SQLAlchemy
 xlsx2csv
 levenshtein
 requests
+networkx
 cmi-pb-terminology @ git+https://github.com/jamesaoverton/cmi-pb-terminology.git@next-2
 ontodev-gadget @ git+https://github.com/ontodev/gadget.git
 ontodev-sprocket @ git+https://github.com/ontodev/sprocket.git@standalone-table

@@ -97,7 +97,8 @@ OPTIONS = {
 
 mapping_helper = TaxonomyMapper()
 
-mapping_target_data = None  # type: Optional[dict]
+mapping_target_data_flat = None
+mapping_target_data_tree = None
 
 # TODO: read these from the config file (name, version, purl, type? (dendrogram, nomenclature, repo))
 mapping_target_config = {
@@ -473,6 +474,7 @@ def mappings():
         ontologies=get_display_ontologies(),
         current_taxonomy=mapping_helper.get_source_table_name(get_display_tables()),
         target_taxonomies=list_target_hierarchies(),
+        target_data_tree=mapping_target_data_tree
     )
 
 
@@ -490,7 +492,7 @@ def mapping_source():
 @BLUEPRINT.route("/mapping_target", methods=["GET"])
 def mapping_target():
     target_name = request.args.get("target_name")
-    target_data = mapping_target_data[target_name]
+    target_data = mapping_target_data_flat[target_name]
 
     search_text = request.args.get("name")
     search_id = request.args.get("entity_id")
@@ -1884,7 +1886,7 @@ def run(
                             predicates can be displayed in alphabetical order after the sorted
                             predicates using '*'
     """
-    global CONFIG, CONN, LOGGER, OPTIONS, mapping_target_data
+    global CONFIG, CONN, LOGGER, OPTIONS, mapping_target_data_flat, mapping_target_data_tree
 
     # Override default options
     for k in OPTIONS.keys():
@@ -1921,7 +1923,7 @@ def run(
 
     # mapping data preparation
     mapping_helper.set_db_connection(CONN)
-    mapping_target_data = mapping_helper.load_target_data(mapping_target_config)
+    mapping_target_data_flat, mapping_target_data_tree = mapping_helper.load_target_data(mapping_target_config)
 
     if cgi_path:
         os.environ["SCRIPT_NAME"] = cgi_path

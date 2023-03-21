@@ -5,8 +5,10 @@
  * Copyright 2020
  * License: Apache License 2.0
  *
- * Project: https://github.com/chniter/bstreeview
- * Project: https://github.com/nhmvienna/bs5treeview (bootstrap 5)
+ * Project: https://github.com/jonmiles/bootstrap-treeview (bootstrap 3)
+ *        : https://jonmiles.github.io/bootstrap-treeview/
+ * Project: https://github.com/chniter/bstreeview (bootstrap 4)
+ * Project: https://github.com/nhmvienna/bs5treeview (bootstrap 5)  (nanobot uses this version)
  */
 ; (function ($, window, document, undefined) {
     "use strict";
@@ -177,10 +179,10 @@
     // preventing against multiple instantiations
     $.fn[pluginName] = function (options) {
         return this.each(function () {
-            if (!$.data(this, "plugin_" + pluginName)) {
+            //if (!$.data(this, "plugin_" + pluginName)) {
                 $.data(this, "plugin_" +
                     pluginName, new bstreeView(this, options));
-            }
+            //}
         });
     };
 })(jQuery, window, document);
