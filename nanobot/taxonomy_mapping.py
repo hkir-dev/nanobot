@@ -14,6 +14,9 @@ class TaxonomyMapper(AbstractMapper):
     def get_source_data(self, source_table_name) :
         return get_source_data(self.db_connection, source_table_name)
 
+    def get_source_tree(self, source_table_name):
+        return get_source_tree(self.get_source_data(source_table_name))
+
     def load_target_data(self, mapping_target_config):
         target_data_flat = dict()
         target_data_tree = dict()
@@ -140,9 +143,20 @@ def get_source_data(db_connection, name):
             "entity_id": db_row["cell_set_accession"],
             "name": name,
             "synonyms": synonyms,
-            "parents": [parent]
+            "parent": parent
         })
     return results
+
+
+def get_source_tree(flat_data):
+    nodes = dict()
+    edges = set()
+    for data in flat_data:
+        nodes[data["entity_id"]] = data
+        if data["parent"]:
+            edges.add((data["entity_id"], data["parent"]))
+
+    return construct_tree_hierarchy(nodes, edges)
 
 
 def get_taxonomy_name(display_tables):

@@ -24,21 +24,32 @@ class AbstractMapper(ABC):
     @abstractmethod
     def get_source_data(self, source_table_name):
         """
-        Retourns the mappings source table data
+        Returns the mappings source table data
         Args:
             source_table_name: name of the source table
 
-        Returns:
+        Returns: source data in flat format
+        """
+        pass
 
+    @abstractmethod
+    def get_source_tree(self, source_table_name):
+        """
+        Returns the mappings source table data in hierarchical format. Uses parent_cell_set_accession field to build a
+        nested source data representation.
+        Args:
+            source_table_name: name of the source table
+
+        Returns: source data in nested tree format.
         """
         pass
 
     @abstractmethod
     def load_target_data(self, mapping_target_config):
         """
-        Loads mapping target's data using the given configurations.
+        Loads mapping target's data using the given configurations in both flat and tree representation.
         Args:
             mapping_target_config: mapping target configurations
-        Returns: Mapping data target
+        Returns: target_data_flat, target_data_tree
         """
         pass

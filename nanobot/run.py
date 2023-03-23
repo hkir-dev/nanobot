@@ -474,14 +474,15 @@ def mappings():
         ontologies=get_display_ontologies(),
         current_taxonomy=mapping_helper.get_source_table_name(get_display_tables()),
         target_taxonomies=list_target_hierarchies(),
+        source_data_tree=mapping_helper.get_source_tree(mapping_helper.get_source_table_name(get_display_tables())),
         target_data_tree=mapping_target_data_tree
     )
 
 
 @BLUEPRINT.route("/mapping_source", methods=["GET"])
 def mapping_source():
-    source_tabel_name = mapping_helper.get_source_table_name(get_display_tables())
-    source_data = mapping_helper.get_source_data(source_tabel_name)
+    source_table_name = mapping_helper.get_source_table_name(get_display_tables())
+    source_data = mapping_helper.get_source_data(source_table_name)
 
     search_text = request.args.get("name")
     search_id = request.args.get("entity_id")

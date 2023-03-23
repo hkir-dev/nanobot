@@ -112,6 +112,7 @@
 
 <script>
 target_data_tree=JSON.parse('{{target_data_tree | tojson}}');
+source_data_tree=JSON.parse('{{source_data_tree | tojson}}');
 
 // Autocomplete operations
 
@@ -214,53 +215,18 @@ $(document).ready(function(e){
 
 // Tree operations
 
-var defaultData = [
-  {
-    text: "Node 1",
-    expanded: true,
-    nodes: [
-      {
-        text: "Sub Node 1",
-        nodes: [
-          {
-            text:  "Sub Child Node 1",
-          },
-          {
-            text: "Sub Child Node 2"
-          }
-        ]
-      },
-      {
-        text: "Sub Node 2"
-      }
-    ]
-  },
-  {
-    text: "Node 2"
-  },
-  {
-    text: "Node 3"
-  },
-  {
-    text: "Node 4"
-  },
-  {
-    text: "Node 5"
-  }
-];
-
 $('#source-treeview').bind('mousewheel', function(e) {
   $(this).scrollTop($(this).scrollTop() - e.originalEvent.wheelDeltaY);
   return false;
 });
 var $searchableTree = $('#source-treeview').bstreeview({
-  data: defaultData,
+  data: source_data_tree,
   color: "#428bca",
   levels: 5,
   showBorder: false
 });
 
-// target tree view
+// target tree view update on taxonomy selection change
 $('#targetTaxonomyName').on('change', function() {
   // remove existing view
   $('#target-treeview').empty();
