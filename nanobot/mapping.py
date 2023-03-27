@@ -10,6 +10,17 @@ class AbstractMapper(ABC):
         self.db_connection = db_connection
 
     @abstractmethod
+    def is_mapping_table(self, table_name):
+        """
+        Identifies if the given table is a mapping table.
+        Args:
+            table_name: name of the table to check
+
+        Returns: True if table is a mapping table, False otherwise
+        """
+        pass
+
+    @abstractmethod
     def get_source_table_name(self, display_tables) -> str:
         """
         Returns the name of the table/hierarchy to be mapped.

@@ -8,6 +8,9 @@ import networkx as nx
 
 class TaxonomyMapper(AbstractMapper):
 
+    def is_mapping_table(self, table_name):
+        return "_cross_taxonomy" in table_name
+
     def get_source_table_name(self, display_tables):
         return get_taxonomy_name(display_tables)
 

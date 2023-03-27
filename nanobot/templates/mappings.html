@@ -1,6 +1,61 @@
 {% extends "template.html" %}
 
 {% block content %}
+
+{% if messages %}
+{% if "success" in messages %}
+{% for msg in messages["success"] %}
+<div class="row justify-content-md-center">
+    <div class="col-md-10">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div><i class="bi-emoji-smile-fill" style="padding-right:5px;"></i> {{ msg }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if "error" in messages %}
+{% for msg in messages["error"] %}
+<div class="row justify-content-md-center">
+    <div class="col-md-10">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div><i class="bi-x-octagon-fill" style="padding-right:5px;"></i> {{ msg }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if "warn" in messages %}
+{% for msg in messages["warn"] %}
+<div class="row justify-content-md-center">
+    <div class="col-md-10">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div><i class="bi-exclamation-triangle-fill" style="padding-right:5px;"></i> {{ msg }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if "info" in messages %}
+{% for msg in messages["info"] %}
+<div class="row justify-content-md-center">
+    <div class="col-md-10">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <div><i class="bi-info-circle-fill" style="padding-right:5px;"></i> {{ msg }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endif %}
+
 <div class="col-md-12">
     <!--    TAXONOMY SELECTION    -->
     <div class="row" style="margin-bottom: 10px">
@@ -35,13 +90,13 @@
     </div>
     <!--    MAPPING FORM    -->
     <div class="row">
-        <form method="get">
+        <form method="post">
             <div class="row">
                 <div class="col-6">
                     <div class="form-group required row mb-2">
                         <label for="sourceAccessionId" class="col-2 col-form-label">Accession Id</label>
                         <div id="sourceAccessionIdDiv" class="col-6">
-                            <input id="sourceAccessionId" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                            <input id="sourceAccessionId" name="cell_set_accession" class="typeahead form-control" type="text" value="" placeholder="Search"/>
                         </div>
                     </div>
                 </div>
@@ -49,7 +104,7 @@
                     <div class="form-group required row mb-2">
                         <label for="targetAccessionId" class="col-2 col-form-label">Accession Id</label>
                         <div id="targetAccessionIdDiv"  class="col-6">
-                            <input id="targetAccessionId" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                            <input id="targetAccessionId" name="mapped_cell_set_accession" class="typeahead form-control" type="text" value="" placeholder="Search"/>
                         </div>
                     </div>
                 </div>
@@ -59,7 +114,7 @@
                     <div class="form-group required row mb-2">
                         <label for="sourceName" class="col-2 col-form-label">Name</label>
                         <div id="sourceNameDiv" class="col-6">
-                            <input id="sourceName" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                            <input id="sourceName"  name="cell_type_name" class="typeahead form-control" type="text" value="" placeholder="Search"/>
                         </div>
                     </div>
                 </div>
@@ -67,7 +122,7 @@
                     <div class="form-group required row mb-2">
                         <label for="targetName" class="col-2 col-form-label">Name</label>
                         <div id="targetNameDiv" class="col-6">
-                            <input id="targetName" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                            <input id="targetName" name="mapped_cell_type_name" class="typeahead form-control" type="text" value="" placeholder="Search"/>
                         </div>
                     </div>
                 </div>
@@ -77,7 +132,7 @@
                     <div class="form-group required row mb-2">
                         <label for="evidence" class="col-2 col-form-label">Evidence Comment</label>
                         <div class="col-9">
-                            <input id="evidence" class="form-control" type="text" value=""/>
+                            <input id="evidence" name="evidence_comment" class="form-control" type="text" value=""/>
                         </div>
                     </div>
                 </div>
@@ -87,7 +142,7 @@
                     <div class="form-group required row mb-2">
                         <label for="provenance" class="col-2 col-form-label">Provenance</label>
                         <div class="col-9">
-                            <input id="provenance" class="form-control" type="text" value=""/>
+                            <input id="provenance" name="provenance" class="form-control" type="text" value=""/>
                         </div>
                     </div>
                 </div>
@@ -97,12 +152,17 @@
                     <div class="form-group row mb-2">
                         <label for="similarity" class="col-2 col-form-label">Similarity Score</label>
                         <div class="col-2">
-                            <input id="similarity" class="form-control" type="text" value=""/>
+                            <input id="similarity" name="similarity_score" class="form-control" type="text" value=""/>
                         </div>
                     </div>
                 </div>
-                <div class="col-3">
-                    <button type="button" class="btn btn-primary px-4 float-right">Map</button>
+            </div>
+            <div class="row">
+                <div class="col-auto">
+                  <button type="submit" name="action" value="validate" class="btn btn-large btn-outline-primary">Validate</button>
+                </div>
+                <div class="col-auto">
+                  <button type="submit" name="action" value="submit" class="btn btn-large btn-outline-secondary">Submit</button>
                 </div>
             </div>
         </form>
@@ -113,6 +173,7 @@
 <script>
 target_data_tree=JSON.parse('{{target_data_tree | tojson}}');
 source_data_tree=JSON.parse('{{source_data_tree | tojson}}');
+edited_data=JSON.parse('{{edited_data | tojson}}');
 
 // Autocomplete operations
 
@@ -241,6 +302,32 @@ $('#targetTaxonomyName').on('change', function() {
       }
   });
 });
+
+// load edited values
+if ('cell_set_accession' in edited_data) {
+    $('#sourceAccessionId')[0].value = edited_data.cell_set_accession;
+}
+if ('cell_type_name' in edited_data) {
+    $('#sourceName')[0].value = edited_data.cell_type_name;
+}
+if ('mapped_cell_set_accession' in edited_data) {
+    $('#targetAccessionId')[0].value = edited_data.mapped_cell_set_accession;
+    taxonomy_name = edited_data.mapped_cell_set_accession.split("_")[0].replace("CS", "CCN");
+    //change event should be declared before trigger
+    $('#targetTaxonomyName').val(taxonomy_name).trigger("change");
+}
+if ('mapped_cell_type_name' in edited_data) {
+    $('#targetName')[0].value = edited_data.mapped_cell_type_name;
+}
+if ('evidence_comment' in edited_data) {
+    $('#evidence')[0].value = edited_data.evidence_comment;
+}
+if ('similarity_score' in edited_data) {
+    $('#similarity')[0].value = edited_data.similarity_score;
+}
+if ('provenance' in edited_data) {
+    $('#provenance')[0].value = edited_data.provenance;
+}
 
 </script>
 
