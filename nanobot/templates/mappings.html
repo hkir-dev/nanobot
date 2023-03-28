@@ -171,12 +171,12 @@
 
 
 <script>
+// parse Flask input parameters
 target_data_tree=JSON.parse('{{target_data_tree | tojson}}');
 source_data_tree=JSON.parse('{{source_data_tree | tojson}}');
 edited_data=JSON.parse('{{edited_data | tojson}}');
 
 // Autocomplete operations
-
 function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
     // constructs the suggestion engine
     var typeaheadBH = new Bloodhound({
