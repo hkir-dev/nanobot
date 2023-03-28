@@ -283,20 +283,20 @@
 		<div class="container-fluid">
 			<a class="navbar-brand">{{ project_name }}</a>
 			<div class="collapse navbar-collapse">
-			{% if ontologies %}
-			<ul class="navbar-nav">
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-						Ontologies
-					</a>
-					<ul class="dropdown-menu">
-						{% for o in ontologies %}
-						<li><a class="dropdown-item" href="{{ url_for('cmi-pb.table', table_name=o, view='tree') }}">{{ o }}</a></li>
-						{% endfor %}
-					</ul>
-				</li>
-			</ul>
-			{% endif %}
+<!--			{% if ontologies %}-->
+<!--			<ul class="navbar-nav">-->
+<!--				<li class="nav-item dropdown">-->
+<!--					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">-->
+<!--						Ontologies-->
+<!--					</a>-->
+<!--					<ul class="dropdown-menu">-->
+<!--						{% for o in ontologies %}-->
+<!--						<li><a class="dropdown-item" href="{{ url_for('cmi-pb.table', table_name=o, view='tree') }}">{{ o }}</a></li>-->
+<!--						{% endfor %}-->
+<!--					</ul>-->
+<!--				</li>-->
+<!--			</ul>-->
+<!--			{% endif %}-->
 			<ul class="navbar-nav">
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -347,6 +347,13 @@
 	$(document).ready(function() {
 	  var app = require("ols-autocomplete");
 	  var instance = new app();
+	  $('.ebi-autocomplete').each(function(i, obj) {
+	  	// disable all id fields associated with a autocomplete name field
+	  	autocomplete_input_name = obj.name;
+	  	target_input_name = autocomplete_input_name.replace("_name", "_id");
+	  	$('input[name="' + target_input_name + '"]')[0].disabled = true
+	  });
+
 	  options={action : function(relativePath, suggestion_ontology, type, iri, data){
 		console.log("In overwritten function")
 		console.log("Relative Path: "+relativePath)
