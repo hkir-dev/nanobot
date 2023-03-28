@@ -320,11 +320,12 @@ def table(table_name):
         if mapping_helper.is_mapping_table(table_name):
             return render_template(
                 "mappings.html",
-                title="Mappings",
+                title=f'Add mapping to <a href="{url_for("cmi-pb.table", table_name=table_name)}">{table_name}</a>',
                 project_name=OPTIONS["title"],
                 tables=get_display_tables(),
                 messages=messages,
                 ontologies=get_display_ontologies(),
+                edited_data={},
                 current_taxonomy=mapping_helper.get_source_table_name(get_display_tables()),
                 target_taxonomies=list_target_hierarchies(),
                 source_data_tree=mapping_helper.get_source_tree(mapping_helper.get_source_table_name(get_display_tables())),
@@ -1272,7 +1273,7 @@ def render_row_from_database(table_name: str, term_id: str, row_number: int) -> 
                     edited_data["provenance"] = res["provenance"]
             return render_template(
                 "mappings.html",
-                title="Mappings",
+                title=f'Update mapping in <a href="{url_for("cmi-pb.table", table_name=table_name)}">{table_name}</a>',
                 project_name=OPTIONS["title"],
                 tables=get_display_tables(),
                 ontologies=get_display_ontologies(),
