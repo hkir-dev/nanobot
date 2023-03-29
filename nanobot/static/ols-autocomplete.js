@@ -40,6 +40,15 @@ require = function t(e, o, i) {
                     if (void 0 != i.data) {
                         var a = t(i.data.type);
                         "ontology" == a ? options.action.call(this, o, i.data.ontology, a, i.data.iri, i.data, i.value) : options.action.call(this, o, i.data.ontology, a, i.data.iri, i.data, i.value)
+                        // autocomplete selection done
+                        // now automatically fill ID field based on the selection
+                        autocomplete_input_name = e.currentTarget.name;
+                        // get the matching 'id' input field's name
+                        // classifying_ontology_term_name -> classifying_ontology_term_id
+                        target_input_name = autocomplete_input_name.replace("_name", "_id");
+                        if ($('input[name="' + target_input_name + '"]').length > 0) {
+                            $('input[name="' + target_input_name + '"]')[0].value = i.data.shortForm;
+                        }
                     } else e.target.form.submit()
                 }).typeahead({
                     hint: !1,
@@ -61,7 +70,7 @@ require = function t(e, o, i) {
                             n = t(e.data.type);
                         return "ontology" != n && (a += "&nbsp;<div class='term-source'>" + e.data.shortForm + "</div>"), "<div style='width: 100%; display: table;'> <div style='display: table-row'><div  style='display: table-cell;' class='ontology-suggest'><div class='suggestion-value'>" + o + "</div>" + i + "</div><div style='vertical-align:middle; text-align: right; width:60px; display: table-cell;'>" + a + "</div></div></div>"
                     },
-                    footer: Handlebars.compile('<hr/><div onclick="jQuery(this).closest(\'form\').submit()" style="text-align: right;" class="tt-suggestion tt-selectable">Search EBI APIs for <b>{{query}}</b></div>')
+                    footer: Handlebars.compile('<hr/><div onclick="jQuery(this).closest(\'form\').submit()" style="text-align: right;" class="tt-suggestion tt-selectable">Search EBI APIs</div>')
                 }
             }
 
@@ -113,8 +122,8 @@ require = function t(e, o, i) {
                     var s = o.obo_id;
                     return void 0 == s && (s = o.short_form), {
                         id: i,
-                       // display shortform of the selected element
-                        value: s,
+                       // display label of the selected element
+                        value: o.label,
                         data: {
                             ontology: o.ontology_name,
                             prefix: o.ontology_prefix,

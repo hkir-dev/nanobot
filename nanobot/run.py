@@ -4,6 +4,7 @@ import logging
 import os
 import sqlite3
 import traceback
+import requests
 
 from collections import defaultdict
 
@@ -46,6 +47,8 @@ from cmi_pb_script.cmi_pb_grammar import grammar, TreeToDict
 from cmi_pb_script.load import configure_db, insert_new_row, read_config_files, update_row
 from cmi_pb_script.validate import get_matching_values, validate_row
 
+from Levenshtein import distance as levenshtein_distance
+from taxonomy_mapping import TaxonomyMapper
 
 BUILTIN_LABELS = {
     "rdfs:subClassOf": "parent class",
@@ -90,6 +93,17 @@ OPTIONS = {
     "synonym": "IAO:0000118",
     "title": "Terminology",
     "tree_predicates": None,
+}
+
+mapping_helper = TaxonomyMapper()
+
+mapping_target_data_flat = None
+mapping_target_data_tree = None
+
+# TODO: read these from the config file (name, version, purl, type? (dendrogram, nomenclature, repo))
+mapping_target_config = {
+    "CCN201912132": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/marmosetM1_CCN201912132/nomenclature_table_CCN201912132.csv",
+    "CCN202002013": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/mouseMOp_CCN202002013/nomenclature_table_CCN202002013.csv"
 }
 
 
@@ -302,18 +316,34 @@ def table(table_name):
             # Some values may be filled in from request args, otherwise values are blank
             row = {c: request.args.get(c) for c in cols if c != "row_number"}
             form_html = get_row_as_form(table_name, row)
-        return render_template(
-            "data_form.html",
-            base_ontology=OPTIONS["base_ontology"],
-            import_table=OPTIONS["import_table"],
-            project_name=OPTIONS["title"],
-            messages=messages,
-            ontologies=get_display_ontologies(),
-            row_form=form_html,
-            table_name=table_name,
-            tables=tables,
-            title=f'Add row to <a href="{url_for("cmi-pb.table", table_name=table_name)}">{table_name}</a>',
-        )
+
+        if mapping_helper.is_mapping_table(table_name):
+            return render_template(
+                "mappings.html",
+                title=f'Add mapping to <a href="{url_for("cmi-pb.table", table_name=table_name)}">{table_name}</a>',
+                project_name=OPTIONS["title"],
+                tables=get_display_tables(),
+                messages=messages,
+                ontologies=get_display_ontologies(),
+                edited_data={},
+                current_taxonomy=mapping_helper.get_source_table_name(get_display_tables()),
+                target_taxonomies=list_target_hierarchies(),
+                source_data_tree=mapping_helper.get_source_tree(mapping_helper.get_source_table_name(get_display_tables())),
+                target_data_tree=mapping_target_data_tree
+            )
+        else:
+            return render_template(
+                "data_form.html",
+                base_ontology=OPTIONS["base_ontology"],
+                import_table=OPTIONS["import_table"],
+                project_name=OPTIONS["title"],
+                messages=messages,
+                ontologies=get_display_ontologies(),
+                row_form=form_html,
+                table_name=table_name,
+                tables=tables,
+                title=f'Add row to <a href="{url_for("cmi-pb.table", table_name=table_name)}">{table_name}</a>',
+            )
 
     # Otherwise render default sprocket table
     try:
@@ -448,6 +478,55 @@ def term(table_name, term_id):
             tables=get_display_tables(),
             title=get_ontology_title(table_name, term_id=term_id),
         )
+
+
+@BLUEPRINT.route("/mapping_source", methods=["GET"])
+def mapping_source():
+    source_table_name = mapping_helper.get_source_table_name(get_display_tables())
+    source_data = mapping_helper.get_source_data(source_table_name)
+
+    search_text = request.args.get("name")
+    search_id = request.args.get("entity_id")
+    source_data = filter_data(source_data, search_text, search_id)
+    return json.dumps(source_data)
+
+
+@BLUEPRINT.route("/mapping_target", methods=["GET"])
+def mapping_target():
+    target_name = request.args.get("target_name")
+    target_data = mapping_target_data_flat[target_name]
+
+    search_text = request.args.get("name")
+    search_id = request.args.get("entity_id")
+    target_data = filter_data(target_data, search_text, search_id)
+    return json.dumps(target_data)
+
+
+def filter_data(source_data, search_text, search_id):
+    if search_text:
+        search_text = search_text.lower().strip()
+        filtered_data = list()
+        for data in source_data:
+            if search_text in data["name"].lower() or any(search_text in s.lower() for s in data["synonyms"]):
+                data["order"] = levenshtein_distance(data["name"], search_text)
+                filtered_data.append(data)
+        source_data = filtered_data
+    if search_id:
+        search_id = search_id.lower().strip()
+        filtered_data = list()
+        for data in source_data:
+            if search_id in data["entity_id"].lower():
+                data["order"] = levenshtein_distance(data["entity_id"], search_id)
+                filtered_data.append(data)
+        source_data = filtered_data
+    return source_data
+
+
+@BLUEPRINT.route("/list_target_hierarchies", methods=["GET"])
+def list_target_hierarchies():
+    target_hierarchy_names = list(mapping_target_config.keys())
+    target_hierarchy_names.sort()
+    return target_hierarchy_names
 
 
 def flatten(lst: list) -> list:
@@ -1142,6 +1221,7 @@ def render_row_from_database(table_name: str, term_id: str, row_number: int) -> 
                 messages["success"] = ["Row successfully updated!"]
 
     if view == "form":
+        res = None
         if not form_html:
             # Get the row
             res = dict(
@@ -1158,20 +1238,52 @@ def render_row_from_database(table_name: str, term_id: str, row_number: int) -> 
             table_url = url_for("cmi-pb.term", table_name=table_name, term_id=term_id)
         else:
             table_url = url_for("cmi-pb.row", table_name=table_name, row_number=row_number)
-        return render_template(
-            "data_form.html",
-            base_ontology=OPTIONS["base_ontology"],
-            base_url=url_for("cmi-pb.table", table_name=table_name),
-            import_table=OPTIONS["import_table"],
-            project_name=OPTIONS["title"],
-            messages=messages,
-            ontologies=get_display_ontologies(),
-            row_form=form_html,
-            subtitle=f'<a href="{table_url}">Return to row</a>',
-            table_name=table_name,
-            tables=get_display_tables(),
-            title=f'Update row in <a href="{url_for("cmi-pb.table", table_name=table_name)}">{table_name}</a>',
-        )
+        if mapping_helper.is_mapping_table(table_name):
+            edited_data = dict()
+            if res:
+                # res may have invalid Json, parse it
+                if "cell_set_accession" in res:
+                    edited_data["cell_set_accession"] = res["cell_set_accession"]
+                if "cell_type_name" in res:
+                    edited_data["cell_type_name"] = res["cell_type_name"]
+                if "mapped_cell_set_accession" in res:
+                    edited_data["mapped_cell_set_accession"] = res["mapped_cell_set_accession"]
+                if "mapped_cell_type_name" in res:
+                    edited_data["mapped_cell_type_name"] = res["mapped_cell_type_name"]
+                if "evidence_comment" in res:
+                    edited_data["evidence_comment"] = res["evidence_comment"]
+                if "similarity_score" in res:
+                    edited_data["similarity_score"] = res["similarity_score"]
+                if "provenance" in res:
+                    edited_data["provenance"] = res["provenance"]
+            return render_template(
+                "mappings.html",
+                title=f'Update mapping in <a href="{url_for("cmi-pb.table", table_name=table_name)}">{table_name}</a>',
+                project_name=OPTIONS["title"],
+                tables=get_display_tables(),
+                ontologies=get_display_ontologies(),
+                messages=messages,
+                edited_data=edited_data,
+                current_taxonomy=mapping_helper.get_source_table_name(get_display_tables()),
+                target_taxonomies=list_target_hierarchies(),
+                source_data_tree=mapping_helper.get_source_tree(mapping_helper.get_source_table_name(get_display_tables())),
+                target_data_tree=mapping_target_data_tree
+            )
+        else:
+            return render_template(
+                "data_form.html",
+                base_ontology=OPTIONS["base_ontology"],
+                base_url=url_for("cmi-pb.table", table_name=table_name),
+                import_table=OPTIONS["import_table"],
+                project_name=OPTIONS["title"],
+                messages=messages,
+                ontologies=get_display_ontologies(),
+                row_form=form_html,
+                subtitle=f'<a href="{table_url}">Return to row</a>',
+                table_name=table_name,
+                tables=get_display_tables(),
+                title=f'Update row in <a href="{url_for("cmi-pb.table", table_name=table_name)}">{table_name}</a>',
+            )
 
     # Set the request.args to be in the format sprocket expects (like swagger)
     request_args = request.args.to_dict()
@@ -1809,7 +1921,7 @@ def run(
                             predicates can be displayed in alphabetical order after the sorted
                             predicates using '*'
     """
-    global CONFIG, CONN, LOGGER, OPTIONS
+    global CONFIG, CONN, LOGGER, OPTIONS, mapping_target_data_flat, mapping_target_data_tree
 
     # Override default options
     for k in OPTIONS.keys():
@@ -1843,6 +1955,10 @@ def run(
     db_url = "sqlite:///" + abspath + "?check_same_thread=False"
     engine = create_engine(db_url)
     CONN = engine.connect()
+
+    # mapping data preparation
+    mapping_helper.set_db_connection(CONN)
+    mapping_target_data_flat, mapping_target_data_tree = mapping_helper.load_target_data(mapping_target_config)
 
     if cgi_path:
         os.environ["SCRIPT_NAME"] = cgi_path

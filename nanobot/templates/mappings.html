@@ -1,0 +1,334 @@
+{% extends "template.html" %}
+
+{% block content %}
+
+{% if messages %}
+{% if "success" in messages %}
+{% for msg in messages["success"] %}
+<div class="row justify-content-md-center">
+    <div class="col-md-10">
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div><i class="bi-emoji-smile-fill" style="padding-right:5px;"></i> {{ msg }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if "error" in messages %}
+{% for msg in messages["error"] %}
+<div class="row justify-content-md-center">
+    <div class="col-md-10">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div><i class="bi-x-octagon-fill" style="padding-right:5px;"></i> {{ msg }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if "warn" in messages %}
+{% for msg in messages["warn"] %}
+<div class="row justify-content-md-center">
+    <div class="col-md-10">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div><i class="bi-exclamation-triangle-fill" style="padding-right:5px;"></i> {{ msg }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if "info" in messages %}
+{% for msg in messages["info"] %}
+<div class="row justify-content-md-center">
+    <div class="col-md-10">
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <div><i class="bi-info-circle-fill" style="padding-right:5px;"></i> {{ msg }}</div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+{% endif %}
+
+<div class="col-md-12">
+    <!--    TAXONOMY SELECTION    -->
+    <div class="row" style="margin-bottom: 10px; margin-top: 15px;">
+        <div class="col-6">
+            <div class="row">
+                <label for="similarity" class="col-3 col-form-label">Current Taxonomy:</label>
+                <label for="similarity" class="col-4 col-form-label">{{current_taxonomy}}</label>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="row">
+                <label for="similarity" class="col-3 col-form-label">Target Taxonomy: </label>
+                <div class="col-4">
+                    <select id="targetTaxonomyName" class="form-select" title="">
+                      <option selected></option>
+                      {% for target_taxon in target_taxonomies %}
+                      <option value="{{target_taxon}}">{{target_taxon}}</option>
+                      {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--    TREE VIEW    -->
+    <div class="row" style="margin-bottom: 20px">
+        <div class="col-6">
+            <div id="source-treeview" class="col-8" style=" overflow-y:auto; height: 300px; border: 1px solid #ccc ;"></div>
+        </div>
+        <div class="col-6">
+            <div id="target-treeview" class="col-8" style=" overflow-y:auto; height: 300px; border: 1px solid #ccc ;"></div>
+        </div>
+    </div>
+    <!--    MAPPING FORM    -->
+    <div class="row">
+        <form method="post">
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group required row mb-2">
+                        <label for="sourceAccessionId" class="col-2 col-form-label">Accession Id</label>
+                        <div id="sourceAccessionIdDiv" class="col-6">
+                            <input id="sourceAccessionId" name="cell_set_accession" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group required row mb-2">
+                        <label for="targetAccessionId" class="col-2 col-form-label">Accession Id</label>
+                        <div id="targetAccessionIdDiv"  class="col-6">
+                            <input id="targetAccessionId" name="mapped_cell_set_accession" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group required row mb-2">
+                        <label for="sourceName" class="col-2 col-form-label">Name</label>
+                        <div id="sourceNameDiv" class="col-6">
+                            <input id="sourceName"  name="cell_type_name" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="form-group required row mb-2">
+                        <label for="targetName" class="col-2 col-form-label">Name</label>
+                        <div id="targetNameDiv" class="col-6">
+                            <input id="targetName" name="mapped_cell_type_name" class="typeahead form-control" type="text" value="" placeholder="Search"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-9">
+                    <div class="form-group required row mb-2">
+                        <label for="evidence" class="col-2 col-form-label">Evidence Comment</label>
+                        <div class="col-9">
+                            <input id="evidence" name="evidence_comment" class="form-control" type="text" value=""/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-9">
+                    <div class="form-group required row mb-2">
+                        <label for="provenance" class="col-2 col-form-label">Provenance</label>
+                        <div class="col-9">
+                            <input id="provenance" name="provenance" class="form-control" type="text" value=""/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-9">
+                    <div class="form-group row mb-2">
+                        <label for="similarity" class="col-2 col-form-label">Similarity Score</label>
+                        <div class="col-2">
+                            <input id="similarity" name="similarity_score" class="form-control" type="text" value=""/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-top: 20px">
+                <div class="col-auto">
+                  <button type="submit" name="action" value="validate" class="btn btn-large btn-outline-primary">Validate</button>
+                </div>
+                <div class="col-auto">
+                  <button type="submit" name="action" value="submit" class="btn btn-large btn-outline-secondary">Submit</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+// parse Flask input parameters
+target_data_tree=JSON.parse('{{target_data_tree | tojson}}');
+source_data_tree=JSON.parse('{{source_data_tree | tojson}}');
+edited_data=JSON.parse('{{edited_data | tojson}}');
+
+// Autocomplete operations
+function configure_autocomplete(divId, relatedFieldId, search_endpoint) {
+    // constructs the suggestion engine
+    var typeaheadBH = new Bloodhound({
+      datumTokenizer: Bloodhound.tokenizers.whitespace,
+      // datumTokenizer: Bloodhound.tokenizers.obj.nonword('name', 'synonyms'),
+      queryTokenizer: Bloodhound.tokenizers.whitespace,
+      sorter: function(a, b) {
+        return a.order - b.order;
+      },
+      remote: {
+        url: search_endpoint,
+        wildcard: '%QUERY',
+        transform : function(response) {
+          return typeaheadBH.sorter(response);
+        },
+        replace: function(url, uriEncodedQuery) {
+            // mapping_target endpoint requires an extra parameter to specify target name
+            if (divId.includes('target')){
+                target_name = $('#targetTaxonomyName').find(":selected").text();
+                if (target_name) {
+                    target_name = $('#targetTaxonomyName').find(":selected").text();
+                    return url.replace("%QUERY", uriEncodedQuery) + '&target_name=' + target_name;
+                }
+            } else {
+                return url.replace("%QUERY", uriEncodedQuery);
+            }
+        },
+      }
+    });
+
+    $('#' + divId + ' .typeahead').typeahead({
+      hint: false,
+      highlight: true,
+      minLength: 1
+    },
+    {
+      name: 'autocomplete',
+      source: typeaheadBH,
+      limit: 30,
+      display: function(item) {
+        if (divId.includes('AccessionId')) {
+            return item.entity_id;
+        } else {
+            return item.name
+        }
+      },
+      templates: {
+        suggestion: function(data) {
+            return '<p>' + data.name + ' [' + data.entity_id + ']' + '</p>';
+        }
+      }
+    });
+}// end configure_autocomplete
+
+configure_autocomplete("sourceAccessionIdDiv", "sourceName", "/mapping_source?entity_id=%QUERY");
+configure_autocomplete("sourceNameDiv", "sourceAccessionId", "/mapping_source?name=%QUERY");
+
+configure_autocomplete("targetAccessionIdDiv", "targetName", "/mapping_target?entity_id=%QUERY");
+configure_autocomplete("targetNameDiv", "targetAccessionId", "/mapping_target?name=%QUERY");
+
+// automatically fill related fields (id <-> name)
+$('#sourceAccessionId').bind('typeahead:select', function(ev, suggestion) {
+  $('#sourceName')[0].value = suggestion.name;
+});
+$('#sourceName').bind('typeahead:select', function(ev, suggestion) {
+  $('#sourceAccessionId')[0].value = suggestion.entity_id;
+});
+$('#targetAccessionId').bind('typeahead:select', function(ev, suggestion) {
+  $('#targetName')[0].value = suggestion.name;
+});
+$('#targetName').bind('typeahead:select', function(ev, suggestion) {
+  $('#targetAccessionId')[0].value = suggestion.entity_id;
+});
+
+
+// Tree operations
+
+$('#source-treeview').bind('mousewheel', function(e) {
+  $(this).scrollTop($(this).scrollTop() - e.originalEvent.wheelDeltaY);
+  return false;
+});
+var $searchableTree = $('#source-treeview').bstreeview({
+  data: source_data_tree,
+  color: "#428bca",
+  levels: 5,
+  showBorder: false
+});
+
+// Treeview on-click events
+$('#source-treeview').find('div').click(function(event) {
+  event.stopPropagation();
+  if(event.target.id) {
+    selected_id = event.target.id;
+    $('#sourceAccessionId')[0].value = selected_id;
+    div_text = $(event.target).text();
+    $('#sourceName')[0].value = div_text.substring(0, div_text.indexOf("[" + selected_id)).trim();
+  }
+});
+
+// target tree view update on taxonomy selection change
+$('#targetTaxonomyName').on('change', function() {
+  // remove existing view
+  $('#target-treeview').empty();
+  $("#target-treeview").removeClass("bstreeview");
+
+  // apply selected treeview
+  tree_data=target_data_tree[this.value];
+  $('#target-treeview').bstreeview({
+      data: tree_data,
+      color: "#428bca",
+      levels: 5,
+      showBorder: false
+  });
+
+  // register events
+  $('#target-treeview').find('div').click(function(event) {
+      event.stopPropagation();
+      if(event.target.id) {
+        selected_id = event.target.id;
+        $('#targetAccessionId')[0].value = selected_id;
+        div_text = $(event.target).text();
+        $('#targetName')[0].value = div_text.substring(0, div_text.indexOf("[" + selected_id)).trim();
+      }
+  });
+});
+
+// load edited values
+if ('cell_set_accession' in edited_data) {
+    $('#sourceAccessionId')[0].value = edited_data.cell_set_accession;
+}
+if ('cell_type_name' in edited_data) {
+    $('#sourceName')[0].value = edited_data.cell_type_name;
+}
+if ('mapped_cell_set_accession' in edited_data) {
+    $('#targetAccessionId')[0].value = edited_data.mapped_cell_set_accession;
+    taxonomy_name = edited_data.mapped_cell_set_accession.split("_")[0].replace("CS", "CCN");
+    //change event should be declared before trigger
+    $('#targetTaxonomyName').val(taxonomy_name).trigger("change");
+}
+if ('mapped_cell_type_name' in edited_data) {
+    $('#targetName')[0].value = edited_data.mapped_cell_type_name;
+}
+if ('evidence_comment' in edited_data) {
+    $('#evidence')[0].value = edited_data.evidence_comment;
+}
+if ('similarity_score' in edited_data) {
+    $('#similarity')[0].value = edited_data.similarity_score;
+}
+if ('provenance' in edited_data) {
+    $('#provenance')[0].value = edited_data.provenance;
+}
+
+</script>
+
+{% endblock %}
