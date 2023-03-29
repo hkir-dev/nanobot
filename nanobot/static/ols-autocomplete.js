@@ -70,7 +70,7 @@ require = function t(e, o, i) {
                             n = t(e.data.type);
                         return "ontology" != n && (a += "&nbsp;<div class='term-source'>" + e.data.shortForm + "</div>"), "<div style='width: 100%; display: table;'> <div style='display: table-row'><div  style='display: table-cell;' class='ontology-suggest'><div class='suggestion-value'>" + o + "</div>" + i + "</div><div style='vertical-align:middle; text-align: right; width:60px; display: table-cell;'>" + a + "</div></div></div>"
                     },
-                    footer: Handlebars.compile('<hr/><div onclick="jQuery(this).closest(\'form\').submit()" style="text-align: right;" class="tt-suggestion tt-selectable">Search EBI APIs for <b>{{query}}</b></div>')
+                    footer: Handlebars.compile('<hr/><div onclick="jQuery(this).closest(\'form\').submit()" style="text-align: right;" class="tt-suggestion tt-selectable">Search EBI APIs</div>')
                 }
             }
 

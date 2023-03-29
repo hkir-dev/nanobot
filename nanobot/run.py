@@ -479,21 +479,6 @@ def term(table_name, term_id):
             title=get_ontology_title(table_name, term_id=term_id),
         )
 
-# TODO hk delete
-# @BLUEPRINT.route("/mappings", methods=["GET"])
-# def mappings():
-#     return render_template(
-#         "mappings.html",
-#         title="Mappings",
-#         project_name=OPTIONS["title"],
-#         tables=get_display_tables(),
-#         ontologies=get_display_ontologies(),
-#         current_taxonomy=mapping_helper.get_source_table_name(get_display_tables()),
-#         target_taxonomies=list_target_hierarchies(),
-#         source_data_tree=mapping_helper.get_source_tree(mapping_helper.get_source_table_name(get_display_tables())),
-#         target_data_tree=mapping_target_data_tree
-#     )
-
 
 @BLUEPRINT.route("/mapping_source", methods=["GET"])
 def mapping_source():
