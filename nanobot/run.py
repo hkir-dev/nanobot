@@ -48,7 +48,7 @@ from cmi_pb_script.load import configure_db, insert_new_row, read_config_files, 
 from cmi_pb_script.validate import get_matching_values, validate_row
 
 from Levenshtein import distance as levenshtein_distance
-from taxonomy_mapping import TaxonomyMapper
+from nanobot.taxonomy_mapping import TaxonomyMapper
 
 BUILTIN_LABELS = {
     "rdfs:subClassOf": "parent class",

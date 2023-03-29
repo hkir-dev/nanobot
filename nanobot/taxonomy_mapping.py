@@ -2,7 +2,7 @@ import requests
 import csv
 import codecs
 
-from mapping import AbstractMapper
+from nanobot.mapping import AbstractMapper
 import networkx as nx
 
 
