@@ -37,6 +37,10 @@
     color: #428bca;
 }
 
+.bstreeview .search-result {
+    color: #D9534F;
+}
+
 .bstreeview .list-group-item:hover {
     background-color:#dee2e6;
 }

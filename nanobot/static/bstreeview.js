@@ -69,6 +69,7 @@
 
             this.initData({ nodes: this.tree });
             var _this = this;
+
             this.build($(this.element), this.tree, 0);
             // Update angle icon on collapse
             $(this.element).on('click', '.list-group-item', function (e) {
@@ -103,6 +104,9 @@
 
                 node.nodeId = _this.nodes.length;
                 node.parentId = parent.nodeId;
+
+                node.state = node.state || {};
+
                 _this.nodes.push(node);
 
                 if (node.nodes) {
@@ -138,6 +142,13 @@
                         .addClass((node.expanded)?_this.settings.expandIcon:_this.settings.collapseIcon);
                     treeItem.append(treeItemStateIcon);
                 }
+
+                // highlight searched node
+                if (node.searchResult) {
+                    treeItem.addClass('search-result');
+                    treeItem.focus();
+                }
+
                 // set node icon if exist.
                 if (node.icon) {
                     var treeItemIcon = $(templates.treeviewItemIcon)
@@ -172,7 +183,150 @@
                     }
                 }
             });
+        },
+
+        search: function (pattern) {
+            this.clearSearch();
+
+            // pattern is accession id now
+            var results = this.findNodes(pattern, 'gi', 'text');
+            // Add searchResult property to all matching nodes
+            // This will be used to apply custom styles
+            // and when identifying result to be cleared
+            $.each(results, function (index, node) {
+                node.searchResult = true;
+            });
+            this.revealNode(results);
+
+			return results;
+        },
+
+        clearSearch : function (options) {
+            var results = $.each(this.findNodes('true', 'g', 'searchResult'), function (index, node) {
+                node.searchResult = false;
+                node.expanded = false;
+            });
+        },
+
+        findNodes: function (pattern, modifier, attribute) {
+            modifier = modifier || 'g';
+            attribute = attribute || 'text';
+
+            var _this = this;
+            return $.grep(this.nodes, function (node) {
+                var val = _this.getNodeValue(node, attribute);
+                if (typeof val === 'string') {
+                    //return val.match(new RegExp(pattern, modifier));
+                    return val == pattern;
+                }
+            });
+        },
+
+        identifyNode : function (identifier) {
+            return ((typeof identifier) === 'number') ?
+                            this.nodes[identifier] :
+                            identifier;
+        },
+
+        getNodeValue: function (obj, attr) {
+            var index = attr.indexOf('.');
+            if (index > 0) {
+                var _obj = obj[attr.substring(0, index)];
+                var _attr = attr.substring(index + 1, attr.length);
+                return this.getNodeValue(_obj, _attr);
+            }
+            else {
+                if (obj.hasOwnProperty(attr)) {
+                    return obj[attr].toString();
+                }
+                else {
+                    return undefined;
+                }
+            }
+        },
+
+        revealNode : function (identifiers, options) {
+            this.forEachIdentifier(identifiers, options, $.proxy(function (node, options) {
+                var parentNode = this.getParent(node);
+                while (parentNode) {
+                    this.setExpandedState(parentNode, true, options);
+                    parentNode = this.getParent(parentNode);
+                };
+            }, this));
+
+            this.render();
+        },
+
+        forEachIdentifier : function (identifiers, options, callback) {
+            options = {};
+
+            if (!(identifiers instanceof Array)) {
+                identifiers = [identifiers];
+            }
+
+            $.each(identifiers, $.proxy(function (index, identifier) {
+                callback(this.identifyNode(identifier), options);
+            }, this));
+            },
+
+            getParent : function (identifier) {
+                var node = this.identifyNode(identifier);
+                return this.nodes[node.parentId];
+            },
+
+            identifyNode : function (identifier) {
+                return ((typeof identifier) === 'number') ?
+                                this.nodes[identifier] :
+                                identifier;
+        },
+
+        setExpandedState : function (node, state, options) {
+            //if (state === node.state.expanded) return;
+            if (state === node.expanded) return;
+
+            if (state && node.nodes) {
+
+                // Expand a node
+                //node.state.expanded = true;
+                node.expanded = true;
+            }
+            else if (!state) {
+
+                // Collapse a node
+                //node.state.expanded = false;
+                node.expanded = false;
+
+                // Collapse child nodes
+                if (node.nodes && !options.ignoreChildren) {
+                    $.each(node.nodes, $.proxy(function (index, node) {
+                        this.setExpandedState(node, false, options);
+                    }, this));
+                }
+            }
+        },
+
+        render : function () {
+//            if (!this.initialized) {
+//
+//                // Setup first time only components
+//                this.$element.addClass(pluginName);
+//                this.$wrapper = $(this.template.list);
+//
+//                this.injectStyle();
+//
+//                this.initialized = true;
+//            }
+
+            //this.$element.empty().append(this.$wrapper.empty());
+            $(this.element).empty();
+            // Build tree
+            this.build($(this.element), this.tree, 0);
         }
+
+
+
+
+
     });
 
     // A really lightweight plugin wrapper around the constructor,
