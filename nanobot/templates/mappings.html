@@ -237,20 +237,6 @@ configure_autocomplete("sourceNameDiv", "sourceAccessionId", "/mapping_source?na
 configure_autocomplete("targetAccessionIdDiv", "targetName", "/mapping_target?entity_id=%QUERY");
 configure_autocomplete("targetNameDiv", "targetAccessionId", "/mapping_target?name=%QUERY");
 
-// automatically fill related fields (id <-> name)
-$('#sourceAccessionId').bind('typeahead:select', function(ev, suggestion) {
-  $('#sourceName')[0].value = suggestion.name;
-});
-$('#sourceName').bind('typeahead:select', function(ev, suggestion) {
-  $('#sourceAccessionId')[0].value = suggestion.entity_id;
-});
-$('#targetAccessionId').bind('typeahead:select', function(ev, suggestion) {
-  $('#targetName')[0].value = suggestion.name;
-});
-$('#targetName').bind('typeahead:select', function(ev, suggestion) {
-  $('#targetAccessionId')[0].value = suggestion.entity_id;
-});
-
 
 // Tree operations
 
@@ -258,7 +244,7 @@ $('#source-treeview').bind('mousewheel', function(e) {
   $(this).scrollTop($(this).scrollTop() - e.originalEvent.wheelDeltaY);
   return false;
 });
-var $searchableTree = $('#source-treeview').bstreeview({
+var $sourceTree = $('#source-treeview').bstreeview({
   data: source_data_tree,
   color: "#428bca",
   levels: 5,
@@ -276,6 +262,8 @@ $('#source-treeview').find('div').click(function(event) {
   }
 });
 
+var $targetTree = null;
+
 // target tree view update on taxonomy selection change
 $('#targetTaxonomyName').on('change', function() {
   // remove existing view
@@ -284,12 +272,24 @@ $('#targetTaxonomyName').on('change', function() {
 
   // apply selected treeview
   tree_data=target_data_tree[this.value];
-  $('#target-treeview').bstreeview({
-      data: tree_data,
-      color: "#428bca",
-      levels: 5,
-      showBorder: false
-  });
+  $targetTree = $('#target-treeview').bstreeview({
+                      data: tree_data,
+                      color: "#428bca",
+                      levels: 5,
+                      showBorder: false
+                  });
+
+  // focus a node if there is anything in the inputs
+  var target_accession_id = $('#targetAccessionId')[0].value;
+  if (target_accession_id) {
+    target_node = {}
+    target_node.entity_id = target_accession_id;
+    var target_name = $('#targetName')[0].value;
+    if (target_name) {
+        target_node.name = target_name;
+    }
+    treeview_focus_node(target_node, $targetTree, 'target-treeview');
+  }
 
   // register events
   $('#target-treeview').find('div').click(function(event) {
@@ -303,21 +303,61 @@ $('#targetTaxonomyName').on('change', function() {
   });
 });
 
-// load edited values
-if ('cell_set_accession' in edited_data) {
-    $('#sourceAccessionId')[0].value = edited_data.cell_set_accession;
+// search node in the treeview and focus
+function treeview_focus_node(node, treeview, treeview_id) {
+  if (treeview !== null) {
+      var tree_label = "";
+      if (node.name) {
+        // be careful about spaces here
+        tree_label = node.name + '  [' + node.entity_id + ']';
+      } else {
+        tree_label = node.entity_id;
+      }
+      treeview.data("plugin_bstreeview").search( tree_label );
+      // $('#source-treeview').scrollTop($('#source-treeview')[0].scrollHeight);
+      $('#' + treeview_id).scrollTop($('.search-result')[0].offsetTop);
+  }
 }
+
+
+// automatically fill related fields (id <-> name)
+$('#sourceAccessionId').bind('typeahead:select', function(ev, suggestion) {
+  $('#sourceName')[0].value = suggestion.name;
+  treeview_focus_node(suggestion, $sourceTree, 'source-treeview');
+});
+$('#sourceName').bind('typeahead:select', function(ev, suggestion) {
+  $('#sourceAccessionId')[0].value = suggestion.entity_id;
+  treeview_focus_node(suggestion, $sourceTree, 'source-treeview');
+});
+$('#targetAccessionId').bind('typeahead:select', function(ev, suggestion) {
+  $('#targetName')[0].value = suggestion.name;
+  treeview_focus_node(suggestion, $targetTree, 'target-treeview');
+});
+$('#targetName').bind('typeahead:select', function(ev, suggestion) {
+  $('#targetAccessionId')[0].value = suggestion.entity_id;
+  treeview_focus_node(suggestion, $targetTree, 'target-treeview');
+});
+
+
+// load edited values
+var source_node = {}
 if ('cell_type_name' in edited_data) {
     $('#sourceName')[0].value = edited_data.cell_type_name;
+    source_node.name = edited_data.cell_type_name;
 }
-if ('mapped_cell_set_accession' in edited_data) {
+if ('cell_set_accession' in edited_data) {
+    $('#sourceAccessionId')[0].value = edited_data.cell_set_accession;
+    source_node.entity_id = edited_data.cell_set_accession;
+    treeview_focus_node(source_node, $sourceTree, 'source-treeview');
+}
+if ('mapped_cell_type_name' in edited_data && edited_data.mapped_cell_type_name) {
+    $('#targetName')[0].value = edited_data.mapped_cell_type_name;
+}
+if ('mapped_cell_set_accession' in edited_data && edited_data.mapped_cell_set_accession) {
     $('#targetAccessionId')[0].value = edited_data.mapped_cell_set_accession;
     taxonomy_name = edited_data.mapped_cell_set_accession.split("_")[0].replace("CS", "CCN");
     //change event should be declared before trigger
     $('#targetTaxonomyName').val(taxonomy_name).trigger("change");
-}
-if ('mapped_cell_type_name' in edited_data) {
-    $('#targetName')[0].value = edited_data.mapped_cell_type_name;
 }
 if ('evidence_comment' in edited_data) {
     $('#evidence')[0].value = edited_data.evidence_comment;

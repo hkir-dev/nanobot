@@ -102,8 +102,9 @@ mapping_target_data_tree = None
 
 # TODO: read these from the config file (name, version, purl, type? (dendrogram, nomenclature, repo))
 mapping_target_config = {
-    "CCN201912132": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/marmosetM1_CCN201912132/nomenclature_table_CCN201912132.csv",
-    "CCN202002013": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/mouseMOp_CCN202002013/nomenclature_table_CCN202002013.csv"
+    # "CCN201912132": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/marmosetM1_CCN201912132/nomenclature_table_CCN201912132.csv",
+    # "CCN202002013": "https://raw.githubusercontent.com/AllenInstitute/MOp_taxonomies_ontology/main/mouseMOp_CCN202002013/nomenclature_table_CCN202002013.csv"
+    "CCN202002013": "https://raw.githubusercontent.com/obophenotype/brain_data_standards_ontologies/master/src/dendrograms/nomenclature_table_CCN202002013.csv"
 }
 
 
