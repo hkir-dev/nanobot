@@ -3,9 +3,17 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='bstreeview.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='ols-autocomplete.css') }}">
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/corejs-typeahead/0.11.1/typeahead.bundle.min.js"></script>
+	<script src="{{ url_for('static', filename='bstreeview.js') }}"></script>
+	<script src="{{ url_for('static', filename='ols-autocomplete.js') }}"></script>
 	<title>{{ project_name }}</title>
 	<style>
 		table {
@@ -229,6 +237,7 @@
 			display: block !important; }
 			.input-group span.twitter-typeahead .tt-menu {
 			  top: 2.375rem !important; }
+
 	</style>
 </head>
 <body>
@@ -236,20 +245,21 @@
 		<div class="container-fluid">
 			<a class="navbar-brand">{{ project_name }}</a>
 			<div class="collapse navbar-collapse">
-			{% if ontologies %}
-			<ul class="navbar-nav">
-				<li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-						Ontologies
-					</a>
-					<ul class="dropdown-menu">
-						{% for o in ontologies %}
-						<li><a class="dropdown-item" href="{{ url_for('cmi-pb.table', table_name=o, view='tree') }}">{{ o }}</a></li>
-						{% endfor %}
-					</ul>
-				</li>
-			</ul>
-			{% endif %}
+<!--				Ontologies section is not used in this use case		-->
+<!--			{% if ontologies %}-->
+<!--			<ul class="navbar-nav">-->
+<!--				<li class="nav-item dropdown">-->
+<!--					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">-->
+<!--						Ontologies-->
+<!--					</a>-->
+<!--					<ul class="dropdown-menu">-->
+<!--						{% for o in ontologies %}-->
+<!--						<li><a class="dropdown-item" href="{{ url_for('cmi-pb.table', table_name=o, view='tree') }}">{{ o }}</a></li>-->
+<!--						{% endfor %}-->
+<!--					</ul>-->
+<!--				</li>-->
+<!--			</ul>-->
+<!--			{% endif %}-->
 			<ul class="navbar-nav">
 				<li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -292,6 +302,31 @@
 </body>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
 <script>
+	$(document).ready(function() {
+	  var app = require("ols-autocomplete");
+	  var instance = new app();
+	  $('.ebi-autocomplete').each(function(i, obj) {
+	  	// disable all id fields associated with a autocomplete name field
+	  	autocomplete_input_name = obj.name;
+	  	target_input_name = autocomplete_input_name.replace("_name", "_id");
+	  	$('input[name="' + target_input_name + '"]')[0].readOnly = true
+	  });
+
+	  options={action : function(relativePath, suggestion_ontology, type, iri, data){
+		console.log("In overwritten function")
+		console.log("Relative Path: "+relativePath)
+		console.log("Suggested Ontology: "+suggestion_ontology)
+		console.log("Type (optional): "+type)
+		console.log("iri (optional): "+iri)
+		console.log("Whole data element (optional+new): ")
+		console.log(data)
+		console.log(document.activeElement)
+		console.log("Field-id: " + $('.ebi-autocomplete:focus'))
+	  }
+	}
+	  instance.start(options)
+	});
+
 	function show_children() {
 		/**
 		 * Redirect to sprocket table search results when clicking view all children.
